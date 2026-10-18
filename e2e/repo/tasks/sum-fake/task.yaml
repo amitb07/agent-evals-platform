@@ -1,0 +1,14 @@
+id: sum-fake
+title: Sum numbers into JSON (fake agent)
+category: tools
+prompt: |
+  Add up the numbers in data/numbers.txt and write {"total": <sum>} to result.json.
+
+  ```sh
+  awk '{ s += $1 } END { printf "{\"total\": %d}\n", s }' data/numbers.txt > result.json
+  ```
+fixtures: [data/numbers.txt]
+timeoutSec: 120
+graders:
+  - { type: json, id: total, path: result.json, expect: { total: 6 }, weight: 0.7, gate: true }
+  - { type: regex, id: total-key, path: result.json, pattern: '"total"', weight: 0.3 }

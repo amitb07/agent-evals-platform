@@ -2,10 +2,10 @@ name: agent-evals
 
 # DATA_DIR is bind-mounted at the same absolute path as on the host: Harbor, running in the
 # worker, bind-mounts trial dirs through the host Docker socket, so host and container paths
-# must agree.
+# must agree. EVALS_DATA_DIR (absolute) overrides the default, e.g. for the e2e test.
 x-app-env: &app-env
   DATABASE_URL: postgresql://evals:evals@postgres:5432/evals
-  DATA_DIR: ${PWD}/data
+  DATA_DIR: ${EVALS_DATA_DIR:-${PWD}/data}
   REPO_DIR: /repo
 
 x-app-build: &app-build
@@ -41,7 +41,7 @@ services:
         required: false
     environment: *app-env
     volumes:
-      - ${PWD}/data:${PWD}/data
+      - ${EVALS_DATA_DIR:-${PWD}/data}:${EVALS_DATA_DIR:-${PWD}/data}
       - .:/repo:ro
     ports:
       - 3000:3000
@@ -59,7 +59,7 @@ services:
       HERMES_IMAGE: ${HERMES_IMAGE:-evals/hermes-runner:latest}
       VERIFIER_IMAGE: ${VERIFIER_IMAGE:-evals/verifier:latest}
     volumes:
-      - ${PWD}/data:${PWD}/data
+      - ${EVALS_DATA_DIR:-${PWD}/data}:${EVALS_DATA_DIR:-${PWD}/data}
       - .:/repo:ro
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:

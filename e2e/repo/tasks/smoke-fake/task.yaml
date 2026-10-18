@@ -1,0 +1,17 @@
+id: smoke-fake
+title: Write a greeting (fake agent)
+category: tools
+prompt: |
+  Write hello.txt containing exactly "Hello, Hermes!".
+
+  ```sh
+  printf 'Hello, Hermes!\n' > hello.txt
+  ```
+timeoutSec: 120
+graders:
+  - { type: file_exists, id: hello-exists, path: hello.txt, weight: 0.2 }
+  - type: command
+    id: hello-content
+    run: test "$(cat hello.txt)" = "Hello, Hermes!"
+    weight: 0.8
+    gate: true

@@ -1,0 +1,17 @@
+# Overlay for the fake-agent end-to-end test (`pnpm e2e`): fixture repo, fake agent, no API key,
+# and a host port so the test can read Postgres. Run as its own compose project.
+services:
+  postgres:
+    ports:
+      - 55433:5432
+
+  api:
+    environment:
+      REPO_DIR: /repo/e2e/repo
+
+  worker:
+    environment:
+      REPO_DIR: /repo/e2e/repo
+      HARBOR_AGENT_IMPORT_PATH: hermes_harbor.fake_agent:FakeAgent
+      POLL_INTERVAL_MS: 1000
+      ANTHROPIC_API_KEY: ''

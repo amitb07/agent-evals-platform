@@ -1,0 +1,12 @@
+id: e2e-fake
+name: Fake-agent end-to-end
+hypothesis: The pipeline grades both arms of both tasks without an API key.
+factor: skills
+taskIds: [smoke-fake, sum-fake]
+baselineConfigId: base
+candidateConfigId: base-skill
+repeats: 1
+concurrency: 4
+passThreshold: 0.8
+costCapUsd: 1
+seed: 1

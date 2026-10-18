@@ -13,7 +13,8 @@
     "test": "pnpm -r --if-present test",
     "db:migrate": "pnpm --filter @evals/db migrate:deploy",
     "sync": "pnpm --filter @evals/api sync",
-    "images:build": "docker build -t evals/hermes-runner:latest docker/hermes && docker build --target verifier -t evals/verifier:latest -f docker/Dockerfile ."
+    "images:build": "docker build -t evals/hermes-runner:latest docker/hermes && docker build --target verifier -t evals/verifier:latest -f docker/Dockerfile .",
+    "e2e": "pnpm images:build && pnpm --filter @evals/worker e2e"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
