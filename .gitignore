@@ -1,0 +1,9 @@
+.env
+node_modules/
+dist/
+data/
+jobs/
+.harbor/
+__pycache__/
+*.pyc
+.venv/
