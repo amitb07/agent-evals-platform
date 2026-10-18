@@ -392,6 +392,7 @@ Services: `postgres` (16, named volume), `api` (port 3000), `worker` (docker soc
 | Memory and skills isolation | With memory off, a run writes only `state.db`, locks, caches, logs, `SOUL.md`, `skills/.bundled_manifest`; seeded `MEMORY.md` reaches the prompt with `memory_enabled: true` and the `memory` toolset enabled, `write_approval: true` staged nothing. `home-writes.txt` (files newer than the instruction) is saved per trial as evidence | §6.1, §9.4 |
 | Network | Allowlist sidecar works on Docker Desktop: `api.anthropic.com` reachable, `example.com` blocked | §6.3 |
 | Measured (trivial task, Sonnet 5) | ~6 s agent time, ~20 s per trial end to end at concurrency 2, ~12k tokens (95% cache reads), ≈ $0.006 per trial | main plan §10 |
+| Toolchain (step 6) | Node ≥ 20.19 (Vite 8, ESLint 10). NestJS **11**, not 12: Nest 12 is ESM-only and Jest can load it only on Node ≥ 24.9. TypeScript 6.0 (typescript-eslint supports < 6.1). Vitest 4 (Vitest 5 needs Node 22). Apps and packages compile to CommonJS (`NodeNext`); web uses `Bundler` | §0, §1.3 |
 | Still open | Anthropic SDK structured-output helper name in TypeScript: read the claude-api skill TS README before §8.2 | §8.2 |
 
 ---
@@ -407,7 +408,7 @@ Services: `postgres` (16, named volume), `api` (port 3000), `worker` (docker soc
 - **Gate:** one Hermes trial under Harbor with tokens, cost and reward. Otherwise switch §7 and §9.3 to a direct Docker runner.
 
 **Day 1 PM — skeleton**
-- [ ] 6. Repo and workspace: `git init`, pnpm workspaces, tsconfig, lint, `.env.example`, folders. (§1)
+- [x] 6. Repo and workspace: `git init`, pnpm workspaces, tsconfig, lint, `.env.example`, folders. (§1)
 - [ ] 7. `packages/shared` schemas with tests. (§2)
 - [ ] 8. Prisma schema, first migration, `PrismaService`. (§3)
 - [ ] 9. YAML sync service in the API. (§4.1)
