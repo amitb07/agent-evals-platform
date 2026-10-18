@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { WorkerModule } from './worker.module';
 
@@ -6,4 +7,7 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 }
 
-void bootstrap();
+bootstrap().catch((error: unknown) => {
+  new Logger('Bootstrap').error(error instanceof Error ? error.stack : String(error));
+  process.exit(1);
+});

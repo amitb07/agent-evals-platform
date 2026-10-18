@@ -23,13 +23,28 @@ FROM node:20-slim AS api
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /out/api .
-RUN mkdir /data && chown node:node /data
 USER node
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
 
+FROM ghcr.io/astral-sh/uv:0.9.17 AS uv
+
+# The worker drives Harbor, which shells out to `docker compose` against the host daemon
+# (socket mounted by compose). Harbor 0.24.0 is the version verified in the day-1 spike.
 FROM node:20-slim AS worker
-ENV NODE_ENV=production
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
+  && install -m 0755 -d /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" \
+    > /etc/apt/sources.list.d/docker.list \
+  && apt-get update && apt-get install -y --no-install-recommends \
+    docker-ce-cli docker-compose-plugin docker-buildx-plugin \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=uv /uv /usr/local/bin/uv
+ENV UV_TOOL_DIR=/opt/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin UV_PYTHON_INSTALL_DIR=/opt/uv/python
+RUN uv tool install 'harbor==0.24.0' --python 3.12 && harbor --version
+COPY hermes_harbor /opt/evals/hermes_harbor
+ENV NODE_ENV=production ADAPTER_DIR=/opt/evals
 WORKDIR /app
 COPY --from=build /out/worker .
 CMD ["node", "dist/main.js"]

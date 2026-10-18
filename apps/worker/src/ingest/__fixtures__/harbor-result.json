@@ -1,0 +1,141 @@
+{
+  "id": "132c50f3-cb71-4429-a2bd-2bb3177679b2",
+  "task_name": "evals/smoke",
+  "trial_name": "smoke__4nY9hNM",
+  "trial_uri": "file:///data/jobs/spike-smoke/smoke__4nY9hNM",
+  "task_id": {
+    "path": "spike/tasks/smoke"
+  },
+  "source": "tasks",
+  "task_checksum": "74f7319e1f72aa055a8074514e2ce0fbd47d54c0c37b1504a8c25d9c4a9aa41c",
+  "config": {
+    "task": {
+      "path": "spike/tasks/smoke",
+      "git_url": null,
+      "git_commit_id": null,
+      "name": null,
+      "ref": null,
+      "overwrite": false,
+      "download_dir": null,
+      "source": "tasks"
+    },
+    "trial_name": "smoke__4nY9hNM",
+    "trials_dir": "/data/jobs/spike-smoke",
+    "install_only": false,
+    "timeout_multiplier": 1.0,
+    "agent_timeout_multiplier": null,
+    "verifier_timeout_multiplier": null,
+    "agent_setup_timeout_multiplier": null,
+    "environment_build_timeout_multiplier": null,
+    "agent": {
+      "name": null,
+      "import_path": "hermes_harbor.hermes_agent:HermesAgent",
+      "model_name": "anthropic/claude-sonnet-5",
+      "n_concurrent": null,
+      "concurrency_group": null,
+      "skills": [],
+      "override_timeout_sec": null,
+      "override_setup_timeout_sec": null,
+      "max_timeout_sec": null,
+      "resume_trajectory": false,
+      "load_trajectory": null,
+      "extra_allowed_hosts": [],
+      "kwargs": {
+        "arm": "B",
+        "home_bundle": "spike/bundles/with-skill",
+        "toolsets": "terminal,file",
+        "skills": "evals-marker",
+        "max_turns": 20
+      },
+      "mcp_servers": []
+    },
+    "user_agent": null,
+    "environment": {
+      "type": "docker",
+      "import_path": null,
+      "force_build": false,
+      "delete": true,
+      "stream": false,
+      "cpu_enforcement_policy": "limit",
+      "memory_enforcement_policy": "limit",
+      "override_cpus": null,
+      "override_memory_mb": null,
+      "override_storage_mb": null,
+      "override_gpus": null,
+      "override_tpu": null,
+      "mounts": null,
+      "extra_docker_compose": [],
+      "kwargs": {},
+      "extra_allowed_hosts": []
+    },
+    "verifier": {
+      "override_timeout_sec": null,
+      "max_timeout_sec": null,
+      "disable": false
+    },
+    "artifacts": [],
+    "extra_instruction_paths": [],
+    "extra_instructions": [],
+    "job_id": "dddf2171-3504-4d22-bf6f-8e35f930bc03",
+    "source_trial": null
+  },
+  "agent_info": {
+    "name": "hermes",
+    "version": "Hermes Agent v0.22.2 (2026.9.24) \u00b7 upstream d923a5eb\nInstall directory: /opt/hermes\nInstall method: docker\nPython: 3.14.7\nOpenAI SDK: 2.24.0",
+    "model_info": {
+      "name": "claude-sonnet-5",
+      "provider": "anthropic"
+    }
+  },
+  "agent_result": {
+    "n_input_tokens": 12278,
+    "n_cache_tokens": 11834,
+    "n_output_tokens": 242,
+    "cost_usd": 0.0058948,
+    "model_usage": null,
+    "rollout_details": null,
+    "metadata": {
+      "session_id": "20261018_172655_f7d251",
+      "hermes_exit_code": 0,
+      "duration_ms": 5856,
+      "tokens": {
+        "input": 4,
+        "output": 242,
+        "total": 12520,
+        "cache_read": 11834,
+        "cache_write": 440
+      },
+      "exit_code": "0",
+      "end_reason": "cli_close",
+      "api_call_count": 2,
+      "cost_status": "estimated",
+      "cost_source": "official_docs_snapshot"
+    }
+  },
+  "verifier_result": {
+    "rewards": {
+      "reward": 1.0
+    }
+  },
+  "verifier_environment_mode": "separate",
+  "exception_info": null,
+  "started_at": "2026-10-18T17:26:43.204950Z",
+  "finished_at": "2026-10-18T17:27:22.957562Z",
+  "environment_setup": {
+    "started_at": "2026-10-18T17:26:43.627262Z",
+    "finished_at": "2026-10-18T17:26:49.291819Z"
+  },
+  "agent_setup": {
+    "started_at": "2026-10-18T17:26:49.291864Z",
+    "finished_at": "2026-10-18T17:26:50.870322Z"
+  },
+  "agent_execution": {
+    "started_at": "2026-10-18T17:26:50.870474Z",
+    "finished_at": "2026-10-18T17:27:06.736940Z"
+  },
+  "verifier": {
+    "started_at": "2026-10-18T17:27:11.787253Z",
+    "finished_at": "2026-10-18T17:27:22.957551Z"
+  },
+  "step_results": null
+}

@@ -21,6 +21,8 @@ export interface JobOptions {
   concurrency: number;
   retries: number;
   arms: [JobArm, JobArm];
+  /** Harbor agent class; defaults to the Hermes adapter. */
+  agentImportPath?: string;
 }
 
 /** Harbor JobConfig for one experiment: both arms in one job, so one scheduler interleaves them. */
@@ -38,7 +40,7 @@ export function jobConfig(opts: JobOptions): Record<string, unknown> {
     datasets: [{ path: opts.datasetDir }],
     // The adapter reads ANTHROPIC_API_KEY from the worker environment (ModelConnectionSpec).
     agents: opts.arms.map(({ arm, config, homeBundle }) => ({
-      import_path: HERMES_AGENT_IMPORT_PATH,
+      import_path: opts.agentImportPath ?? HERMES_AGENT_IMPORT_PATH,
       model_name: `${config.provider}/${config.model}`,
       kwargs: {
         arm,
