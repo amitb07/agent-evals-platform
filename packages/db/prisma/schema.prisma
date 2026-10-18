@@ -1,0 +1,228 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TaskCategory {
+  tools
+  coding
+  skill
+  memory
+  open
+}
+
+enum Factor {
+  skills
+  tools
+  memory
+  model
+}
+
+enum ExperimentStatus {
+  draft
+  queued
+  running
+  stopped_budget
+  completed
+  failed
+}
+
+enum Arm {
+  A
+  B
+}
+
+enum TrialStatus {
+  pending
+  running
+  graded
+  failed
+  ingest_failed
+}
+
+enum FailureCause {
+  agent_exhausted_budget
+  agent_refused_task
+  sandbox_failed
+  model_provider_failed
+  verifier_failed
+  harbor_failed
+  cancelled
+  unclassified
+}
+
+enum GraderType {
+  file_exists
+  command
+  regex
+  json
+  llm_judge
+}
+
+model Task {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug       String       @unique
+  yamlHash   String
+  title      String
+  category   TaskCategory
+  prompt     String
+  fixtures   String[]
+  graders    Json
+  timeoutSec Int
+  tags       String[]
+  createdAt  DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime     @updatedAt @db.Timestamptz(3)
+
+  experiments ExperimentTask[]
+  trials      Trial[]
+}
+
+model AgentConfig {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug              String   @unique
+  yamlHash          String
+  name              String
+  hermesImageDigest String
+  model             String
+  provider          String
+  skills            String[]
+  toolsets          String[]
+  memory            Json
+  maxTurns          Int
+  compiledHomeHash  String?
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+
+  baselineFor  Experiment[] @relation("baseline")
+  candidateFor Experiment[] @relation("candidate")
+  trials       Trial[]
+}
+
+model Experiment {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug              String           @unique
+  yamlHash          String?
+  name              String
+  hypothesis        String
+  factor            Factor
+  repeats           Int
+  concurrency       Int
+  passThreshold     Float
+  costCapUsd        Float
+  seed              Int
+  heldOutTaskIds    String[]
+  baselineConfigId  String           @db.Uuid
+  candidateConfigId String           @db.Uuid
+  status            ExperimentStatus @default(draft)
+  stopRequested     Boolean          @default(false)
+  harborJobName     String?
+  jobDir            String?
+  error             String?
+  startedAt         DateTime?        @db.Timestamptz(3)
+  finishedAt        DateTime?        @db.Timestamptz(3)
+  createdAt         DateTime         @default(now()) @db.Timestamptz(3)
+
+  baselineConfig  AgentConfig      @relation("baseline", fields: [baselineConfigId], references: [id])
+  candidateConfig AgentConfig      @relation("candidate", fields: [candidateConfigId], references: [id])
+  tasks           ExperimentTask[]
+  trials          Trial[]
+  stats           StatsSnapshot?
+
+  @@index([status])
+}
+
+model ExperimentTask {
+  experimentId String @db.Uuid
+  taskId       String @db.Uuid
+  position     Int
+
+  experiment Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  task       Task       @relation(fields: [taskId], references: [id])
+
+  @@id([experimentId, taskId])
+}
+
+model Trial {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  experimentId    String        @db.Uuid
+  taskId          String        @db.Uuid
+  configId        String        @db.Uuid
+  arm             Arm
+  repeatIndex     Int
+  attempt         Int           @default(1)
+  harborTrialName String?       @unique
+  harborTrialDir  String?
+  status          TrialStatus   @default(pending)
+  failureCause    FailureCause?
+  rewardValid     Boolean       @default(false)
+  turnExitReason  String?
+  exitCode        Int?
+  startedAt       DateTime?     @db.Timestamptz(3)
+  finishedAt      DateTime?     @db.Timestamptz(3)
+  durationMs      Int?
+  tokensIn        Int?
+  tokensOut       Int?
+  cacheRead       Int?
+  costUsd         Float?
+  score           Float?
+  gatePassed      Boolean?
+  passed          Boolean?
+  eventsPath      String?
+  sessionPath     String?
+  trajectoryPath  String?
+  workspacePath   String?
+  stderrPath      String?
+  manifestPath    String?
+  error           String?
+
+  experiment Experiment   @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  task       Task         @relation(fields: [taskId], references: [id])
+  config     AgentConfig  @relation(fields: [configId], references: [id])
+  grades     Grade[]
+  manifest   RunManifest?
+
+  @@unique([experimentId, taskId, arm, repeatIndex])
+  @@index([experimentId, status])
+}
+
+model Grade {
+  id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trialId  String     @db.Uuid
+  graderId String
+  type     GraderType
+  score    Float
+  passed   Boolean
+  gate     Boolean
+  reason   String
+  evidence Json
+
+  trial Trial @relation(fields: [trialId], references: [id], onDelete: Cascade)
+
+  @@unique([trialId, graderId])
+}
+
+model RunManifest {
+  trialId String @id @db.Uuid
+  json    Json
+
+  trial Trial @relation(fields: [trialId], references: [id], onDelete: Cascade)
+}
+
+model StatsSnapshot {
+  experimentId String   @id @db.Uuid
+  json         Json
+  computedAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  experiment Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+}
+
+model WorkerHeartbeat {
+  id        String   @id
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}

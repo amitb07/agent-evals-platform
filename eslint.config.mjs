@@ -5,7 +5,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist/', 'data/', 'spike/'] },
+  { ignores: ['**/dist/', '**/generated/', 'data/', 'spike/'] },
   js.configs.recommended,
   {
     files: ['**/*.ts'],

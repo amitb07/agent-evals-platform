@@ -6,3 +6,4 @@ research_notes/
 reports/
 *.md
 *.html
+**/generated/

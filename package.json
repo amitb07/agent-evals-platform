@@ -10,7 +10,8 @@
     "build": "pnpm -r build",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
-    "test": "pnpm -r --if-present test"
+    "test": "pnpm -r --if-present test",
+    "db:migrate": "pnpm --filter @evals/db migrate:deploy"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
