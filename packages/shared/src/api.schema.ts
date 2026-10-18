@@ -1,0 +1,181 @@
+import { z } from 'zod';
+import { armSchema, isoDateTimeSchema, slugSchema, unitIntervalSchema } from './common.schema';
+import { factorSchema } from './experiment.schema';
+import { gradeCheckSchema } from './grades.schema';
+import { failureCauseSchema } from './harbor.schema';
+import { taskCategorySchema } from './task.schema';
+
+export const experimentStatusSchema = z.enum([
+  'draft',
+  'queued',
+  'running',
+  'stopped_budget',
+  'completed',
+  'failed',
+]);
+export type ExperimentStatus = z.infer<typeof experimentStatusSchema>;
+
+export const trialStatusSchema = z.enum([
+  'pending',
+  'running',
+  'graded',
+  'failed',
+  'ingest_failed',
+]);
+export type TrialStatus = z.infer<typeof trialStatusSchema>;
+
+export const verdictSchema = z.enum(['better', 'worse', 'inconclusive']);
+export type Verdict = z.infer<typeof verdictSchema>;
+
+export const taskSummarySchema = z.object({
+  slug: slugSchema,
+  title: z.string(),
+  category: taskCategorySchema,
+  graderCount: z.int(),
+});
+export type TaskSummary = z.infer<typeof taskSummarySchema>;
+
+export const configSummarySchema = z.object({
+  slug: slugSchema,
+  name: z.string(),
+  model: z.string(),
+  skills: z.array(z.string()),
+  toolsets: z.array(z.string()),
+  memoryMode: z.enum(['off', 'seeded']),
+});
+export type ConfigSummary = z.infer<typeof configSummarySchema>;
+
+export const experimentSummarySchema = z.object({
+  id: z.uuid(),
+  slug: slugSchema,
+  name: z.string(),
+  factor: factorSchema,
+  baselineConfig: slugSchema,
+  candidateConfig: slugSchema,
+  status: experimentStatusSchema,
+  progress: z.object({ done: z.int(), total: z.int() }),
+  spendUsd: z.number(),
+  createdAt: isoDateTimeSchema,
+});
+export type ExperimentSummary = z.infer<typeof experimentSummarySchema>;
+
+const armSummarySchema = z.object({
+  trials: z.int(),
+  valid: z.int(),
+  passes: z.int(),
+  meanScore: z.number().nullable(),
+  costUsd: z.number(),
+});
+
+export const experimentDetailSchema = experimentSummarySchema.extend({
+  hypothesis: z.string(),
+  repeats: z.int(),
+  concurrency: z.int(),
+  passThreshold: unitIntervalSchema,
+  costCapUsd: z.number(),
+  seed: z.int(),
+  heldOutTaskIds: z.array(slugSchema),
+  error: z.string().nullable(),
+  startedAt: isoDateTimeSchema.nullable(),
+  finishedAt: isoDateTimeSchema.nullable(),
+  tasks: z.array(
+    z.object({
+      taskSlug: slugSchema,
+      category: taskCategorySchema,
+      A: armSummarySchema,
+      B: armSummarySchema,
+    }),
+  ),
+});
+export type ExperimentDetail = z.infer<typeof experimentDetailSchema>;
+
+export const trialsQuerySchema = z.object({
+  taskId: z.uuid().optional(),
+  arm: armSchema.optional(),
+});
+export type TrialsQuery = z.infer<typeof trialsQuerySchema>;
+
+export const trialSummarySchema = z.object({
+  id: z.uuid(),
+  taskSlug: slugSchema,
+  arm: armSchema,
+  repeatIndex: z.int(),
+  attempt: z.int(),
+  status: trialStatusSchema,
+  failureCause: failureCauseSchema.nullable(),
+  rewardValid: z.boolean(),
+  score: unitIntervalSchema.nullable(),
+  passed: z.boolean().nullable(),
+  costUsd: z.number().nullable(),
+  durationMs: z.int().nullable(),
+  startedAt: isoDateTimeSchema.nullable(),
+});
+export type TrialSummary = z.infer<typeof trialSummarySchema>;
+
+export const trialDetailSchema = trialSummarySchema.extend({
+  experimentId: z.uuid(),
+  turnExitReason: z.string().nullable(),
+  exitCode: z.int().nullable(),
+  tokensIn: z.int().nullable(),
+  tokensOut: z.int().nullable(),
+  cacheRead: z.int().nullable(),
+  gatePassed: z.boolean().nullable(),
+  error: z.string().nullable(),
+  finishedAt: isoDateTimeSchema.nullable(),
+  grades: z.array(gradeCheckSchema),
+  manifest: z.record(z.string(), z.unknown()).nullable(),
+});
+export type TrialDetail = z.infer<typeof trialDetailSchema>;
+
+export const trialDiffSchema = z.object({ diff: z.string() });
+export type TrialDiff = z.infer<typeof trialDiffSchema>;
+
+const confidenceIntervalSchema = z.object({
+  effect: z.number(),
+  ciLow: z.number(),
+  ciHigh: z.number(),
+});
+
+const armMetricsSchema = z.object({
+  passAt1: unitIntervalSchema,
+  passAtK: unitIntervalSchema,
+  passHatK: unitIntervalSchema,
+  costPerTrialUsd: z.number(),
+  costPerPassUsd: z.number().nullable(),
+  meanDurationMs: z.number().nullable(),
+  meanTokens: z.number().nullable(),
+  excluded: z.int(),
+});
+
+export const experimentStatsSchema = confidenceIntervalSchema.extend({
+  verdict: verdictSchema,
+  twoStage: confidenceIntervalSchema,
+  mde: z.number().nullable(),
+  nTasks: z.int(),
+  k: z.int(),
+  tasks: z.array(
+    z.object({
+      taskSlug: slugSchema,
+      category: taskCategorySchema,
+      meanA: z.number().nullable(),
+      meanB: z.number().nullable(),
+      delta: z.number().nullable(),
+      sdA: z.number().nullable(),
+      sdB: z.number().nullable(),
+      flaky: z.boolean(),
+    }),
+  ),
+  arms: z.object({ A: armMetricsSchema, B: armMetricsSchema }),
+  computedAt: isoDateTimeSchema,
+});
+export type ExperimentStats = z.infer<typeof experimentStatsSchema>;
+
+export const healthSchema = z.object({
+  db: z.boolean(),
+  dataDirWritable: z.boolean(),
+  workerHeartbeatAgeSec: z.number().nullable(),
+});
+export type Health = z.infer<typeof healthSchema>;
+
+export const apiErrorSchema = z.object({ error: z.string(), details: z.unknown().optional() });
+export type ApiError = z.infer<typeof apiErrorSchema>;

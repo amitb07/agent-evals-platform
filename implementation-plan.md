@@ -393,6 +393,7 @@ Services: `postgres` (16, named volume), `api` (port 3000), `worker` (docker soc
 | Network | Allowlist sidecar works on Docker Desktop: `api.anthropic.com` reachable, `example.com` blocked | §6.3 |
 | Measured (trivial task, Sonnet 5) | ~6 s agent time, ~20 s per trial end to end at concurrency 2, ~12k tokens (95% cache reads), ≈ $0.006 per trial | main plan §10 |
 | Toolchain (step 6) | Node ≥ 20.19 (Vite 8, ESLint 10). NestJS **11**, not 12: Nest 12 is ESM-only and Jest can load it only on Node ≥ 24.9. TypeScript 6.0 (typescript-eslint supports < 6.1). Vitest 4 (Vitest 5 needs Node 22). Apps and packages compile to CommonJS (`NodeNext`); web uses `Bundler` | §0, §1.3 |
+| Shared schemas (step 7) | Every grader has a required slug `id` (keys in `reward.json` and `Grade.graderId`); `llm_judge` has no `gate` field. `usage.json` schema replaced by `hermesSessionSchema` (session export) and `hermesTrialMetadataSchema` (`agent_result.metadata`). The A/B factor rule needs both configs, so it is `factorViolation(factor, a, b)`, called by sync and the API, not a schema refine; `hermesImageDigest` and `maxTurns` must always match. Failure causes follow Harbor's published table and add `cancelled`; unknown exceptions are `unclassified`, reward invalid. Configs cannot list `memory`/`skills` toolsets. Harbor `task_name` is the `[task] name` from `task.toml` (e.g. `evals/smoke`): the generator and ingestion must agree on it | §2, §9.4 |
 | Still open | Anthropic SDK structured-output helper name in TypeScript: read the claude-api skill TS README before §8.2 | §8.2 |
 
 ---
@@ -409,7 +410,7 @@ Services: `postgres` (16, named volume), `api` (port 3000), `worker` (docker soc
 
 **Day 1 PM — skeleton**
 - [x] 6. Repo and workspace: `git init`, pnpm workspaces, tsconfig, lint, `.env.example`, folders. (§1)
-- [ ] 7. `packages/shared` schemas with tests. (§2)
+- [x] 7. `packages/shared` schemas with tests. (§2)
 - [ ] 8. Prisma schema, first migration, `PrismaService`. (§3)
 - [ ] 9. YAML sync service in the API. (§4.1)
 - [ ] 10. Docker Compose skeleton that starts with empty apps. (§13)
