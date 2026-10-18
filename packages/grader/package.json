@@ -1,6 +1,9 @@
 {
   "name": "@evals/grader",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

@@ -1,0 +1,72 @@
+name: agent-evals
+
+x-app-env: &app-env
+  DATABASE_URL: postgresql://evals:evals@postgres:5432/evals
+  DATA_DIR: /data
+  REPO_DIR: /repo
+
+x-app-build: &app-build
+  context: .
+  dockerfile: docker/Dockerfile
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: evals
+      POSTGRES_PASSWORD: evals
+      POSTGRES_DB: evals
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U evals]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    build: { <<: *app-build, target: migrate }
+    environment: *app-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: { <<: *app-build, target: api }
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    volumes:
+      - data:/data
+      - .:/repo:ro
+    ports:
+      - 3000:3000
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    build: { <<: *app-build, target: worker }
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    volumes:
+      - data:/data
+      - .:/repo:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build: { <<: *app-build, target: web }
+    ports:
+      - 8080:8080
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  data:

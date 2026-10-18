@@ -1,6 +1,9 @@
 {
   "name": "@evals/api",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "nest build",
     "dev": "nest start --watch",
