@@ -28,7 +28,6 @@ from harbor.models.trajectories import (
     ToolCall,
     Trajectory,
 )
-from harbor.trial.errors import AgentTimeoutError
 from pydantic import Field
 
 HERMES_HOME = "/opt/data"
@@ -41,7 +40,6 @@ PROVIDER_ERRORS: tuple[tuple[re.Pattern[str], type[Exception]], ...] = (
     (re.compile(r"internal server error|\b5\d\d\b", re.I), ApiInternalServerError),
     (re.compile(r"authentication|invalid.*api.?key|\b401\b", re.I), AgentAuthenticationError),
 )
-BUDGET_EXIT_REASONS = re.compile(r"max.?turns|iteration|budget", re.I)
 
 
 class HermesOptions(InstalledAgentOptions):
@@ -75,7 +73,11 @@ class HermesAgent(BaseInstalledAgent):
         return self.environment_logs_dir.as_posix()
 
     def _agent_env(self) -> dict[str, str]:
-        env = {"HERMES_HOME": HERMES_HOME, "HOME": HERMES_HOME}
+        env = {
+            "HERMES_HOME": HERMES_HOME,
+            "HOME": HERMES_HOME,
+            "HERMES_WRITE_SAFE_ROOT": WORKDIR,
+        }
         if key := self.model_connection.api_key:
             env["ANTHROPIC_API_KEY"] = key
         return env
@@ -85,7 +87,6 @@ class HermesAgent(BaseInstalledAgent):
         opts = self.opts
         top = [
             "hermes",
-            "--usage-file", f"{logs}/usage.json",
             "-m", self._parsed_model_name or "",
             "--provider", "anthropic",
             "-t", opts.toolsets,
@@ -101,9 +102,8 @@ class HermesAgent(BaseInstalledAgent):
             "--format", "stream-json",
             "--max-turns", str(opts.max_turns),
         ]
-        run = shlex.join(top + chat)
         return (
-            f"{run} > {logs}/events.jsonl 2> {logs}/stderr.txt; "
+            f"{shlex.join(top + chat)} > {logs}/events.jsonl 2> {logs}/stderr.txt; "
             f"echo $? > {logs}/exit_code"
         )
 
@@ -119,7 +119,7 @@ class HermesAgent(BaseInstalledAgent):
 
         await self.exec_as_root(
             environment,
-            f"rm -rf {HERMES_HOME} && mkdir -p {HERMES_HOME} {logs} {WORKDIR}",
+            f"mkdir -p {HERMES_HOME} {logs} {WORKDIR} && find {HERMES_HOME} -mindepth 1 -delete",
         )
         await environment.upload_dir(self.opts.home_bundle, HERMES_HOME)
         with tempfile.TemporaryDirectory() as tmp:
@@ -135,29 +135,26 @@ class HermesAgent(BaseInstalledAgent):
 
         await self.exec_as_agent(environment, self._hermes_command(), env=env, cwd=WORKDIR)
 
-        usage = await self._download_json(environment, f"{logs}/usage.json")
-        if session_id := usage.get("session_id"):
+        await self.exec_as_agent(
+            environment,
+            f"find {HERMES_HOME} -type f -newer {logs}/instruction.md > {logs}/home-writes.txt; "
+            f"cp {HERMES_HOME}/config.yaml {logs}/effective-config.yaml",
+        )
+        result = _result_event(await self._download_text(environment, f"{logs}/events.jsonl"))
+        if session_id := result.get("session_id"):
             await self.exec_as_agent(
                 environment,
                 f"hermes sessions export --format jsonl --yes "
-                f"--session-id {shlex.quote(session_id)} {logs}/session.jsonl",
+                f"--session-id {shlex.quote(str(session_id))} {logs}/session.jsonl",
                 env=env,
             )
-        await self.exec_as_agent(
-            environment, f"cp {HERMES_HOME}/config.yaml {logs}/effective-config.yaml"
-        )
 
         exit_code = (await self._download_text(environment, f"{logs}/exit_code")).strip()
         if exit_code != "0":
-            self._raise_for_failure(usage, await self._download_text(environment, f"{logs}/stderr.txt"))
-
-    def _raise_for_failure(self, usage: dict[str, Any], stderr: str) -> None:
-        reason = str(usage.get("turn_exit_reason") or "")
-        if BUDGET_EXIT_REASONS.search(reason):
-            raise AgentTimeoutError(f"Hermes stopped: {reason}")
-        for pattern, error in PROVIDER_ERRORS:
-            if pattern.search(stderr):
-                raise error(f"Hermes failed: {stderr[-500:]}")
+            stderr = await self._download_text(environment, f"{logs}/stderr.txt")
+            for pattern, error in PROVIDER_ERRORS:
+                if pattern.search(stderr):
+                    raise error(f"Hermes failed: {stderr[-500:]}")
 
     async def _download_text(self, environment: BaseEnvironment, remote: str) -> str:
         with tempfile.TemporaryDirectory() as tmp:
@@ -168,45 +165,45 @@ class HermesAgent(BaseInstalledAgent):
             except Exception:
                 return ""
 
-    async def _download_json(self, environment: BaseEnvironment, remote: str) -> dict[str, Any]:
-        text = await self._download_text(environment, remote)
-        try:
-            data = json.loads(text) if text else {}
-        except json.JSONDecodeError:
-            data = {}
-        return data if isinstance(data, dict) else {}
-
     def populate_context_post_run(self, context: AgentContext) -> None:
-        usage = _read_json(self.logs_dir / "usage.json")
-        if usage:
-            context.n_input_tokens = usage.get("input_tokens")
-            context.n_cache_tokens = usage.get("cache_read_tokens")
-            context.n_output_tokens = usage.get("output_tokens")
-            context.cost_usd = usage.get("estimated_cost_usd")
-            context.metadata = {
-                key: usage.get(key)
-                for key in ("session_id", "turn_exit_reason", "completed", "failed", "cost_status")
-            }
-        exit_code = self.logs_dir / "exit_code"
-        if exit_code.exists():
-            context.metadata = {**(context.metadata or {}), "exit_code": exit_code.read_text().strip()}
-
-        trajectory = self._trajectory(usage)
+        events_path = self.logs_dir / "events.jsonl"
+        events_text = events_path.read_text() if events_path.exists() else ""
+        result = _result_event(events_text)
+        tokens = result.get("tokens") or {}
+        if tokens:
+            cache_read = int(tokens.get("cache_read") or 0)
+            context.n_input_tokens = (
+                int(tokens.get("input") or 0) + cache_read + int(tokens.get("cache_write") or 0)
+            )
+            context.n_cache_tokens = cache_read
+            context.n_output_tokens = int(tokens.get("output") or 0)
+        session = _session_export(self.logs_dir / "session.jsonl")
+        if session.get("estimated_cost_usd") is not None:
+            context.cost_usd = float(session["estimated_cost_usd"])
+        exit_code_path = self.logs_dir / "exit_code"
+        context.metadata = {
+            "session_id": result.get("session_id"),
+            "hermes_exit_code": result.get("exit_code"),
+            "duration_ms": result.get("duration_ms"),
+            "tokens": tokens or None,
+            "exit_code": exit_code_path.read_text().strip() if exit_code_path.exists() else None,
+            "end_reason": session.get("end_reason"),
+            "api_call_count": session.get("api_call_count"),
+            "cost_status": session.get("cost_status"),
+            "cost_source": session.get("cost_source"),
+        }
+        trajectory = self._trajectory(events_text, result, context)
         if trajectory is not None:
             (self.logs_dir / "trajectory.json").write_text(
                 json.dumps(trajectory.to_json_dict(), indent=2, ensure_ascii=False)
             )
 
-    def _trajectory(self, usage: dict[str, Any]) -> Trajectory | None:
-        events_path = self.logs_dir / "events.jsonl"
-        instruction_path = self.logs_dir / "instruction.md"
-        if not events_path.exists():
+    def _trajectory(
+        self, events_text: str, result: dict[str, Any], context: AgentContext
+    ) -> Trajectory | None:
+        if not events_text:
             return None
-        events = [
-            json.loads(line)
-            for line in events_path.read_text().splitlines()
-            if line.strip()
-        ]
+        instruction_path = self.logs_dir / "instruction.md"
         steps = [
             Step(
                 step_id=1,
@@ -227,37 +224,39 @@ class HermesAgent(BaseInstalledAgent):
                     source="agent",
                     model_name=self._parsed_model_name,
                     message="".join(text),
-                    tool_calls=calls or None,
-                    observation=Observation(results=results) if results else None,
+                    tool_calls=list(calls) or None,
+                    observation=Observation(results=list(results)) if results else None,
                 )
             )
             text.clear()
             calls.clear()
             results.clear()
 
-        for event in events:
+        for event in _events(events_text):
             kind = event.get("type")
             if kind == "text":
                 if calls:
                     flush()
-                text.append(str(event.get("text") or event.get("content") or ""))
+                text.append(str(event.get("text") or ""))
             elif kind == "tool_use":
-                call_id = str(event.get("id") or f"call_{len(steps)}_{len(calls) + 1}")
                 arguments = event.get("input")
                 calls.append(
                     ToolCall(
-                        tool_call_id=call_id,
+                        tool_call_id=f"call_{len(steps)}_{len(calls) + 1}",
                         function_name=str(event.get("name") or "unknown"),
                         arguments=arguments if isinstance(arguments, dict) else {"input": arguments},
                     )
                 )
-            elif kind == "tool_result" and calls:
-                source_id = str(event.get("tool_use_id") or event.get("id") or calls[len(results)].tool_call_id)
+            elif kind == "tool_result" and len(results) < len(calls):
                 results.append(
                     ObservationResult(
-                        source_call_id=source_id,
-                        content=str(event.get("output") or event.get("content") or ""),
-                        extra={"is_error": bool(event.get("is_error")), "duration_ms": event.get("duration_ms")},
+                        source_call_id=calls[len(results)].tool_call_id,
+                        content=str(event.get("output") or ""),
+                        extra={
+                            "name": event.get("name"),
+                            "is_error": bool(event.get("is_error")),
+                            "duration_ms": event.get("duration_ms"),
+                        },
                     )
                 )
                 if len(results) == len(calls):
@@ -266,25 +265,51 @@ class HermesAgent(BaseInstalledAgent):
 
         return Trajectory(
             schema_version="ATIF-v1.7",
-            session_id=usage.get("session_id"),
-            agent=Agent(name=self.name(), version=self.version() or "unknown", model_name=self._parsed_model_name),
+            session_id=result.get("session_id"),
+            agent=Agent(
+                name=self.name(),
+                version=self.version() or "unknown",
+                model_name=self._parsed_model_name,
+            ),
             steps=steps,
             final_metrics=FinalMetrics(
-                total_prompt_tokens=usage.get("input_tokens"),
-                total_completion_tokens=usage.get("output_tokens"),
-                total_cached_tokens=usage.get("cache_read_tokens"),
-                total_cost_usd=usage.get("estimated_cost_usd"),
+                total_prompt_tokens=context.n_input_tokens,
+                total_completion_tokens=context.n_output_tokens,
+                total_cached_tokens=context.n_cache_tokens,
+                total_cost_usd=context.cost_usd,
                 total_steps=len(steps),
             ),
-            extra={"turn_exit_reason": usage.get("turn_exit_reason")},
+            extra={"hermes_exit_code": result.get("exit_code"), "duration_ms": result.get("duration_ms")},
         )
 
 
-def _read_json(path: Path) -> dict[str, Any]:
+def _events(text: str) -> list[dict[str, Any]]:
+    events = []
+    for line in text.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(event, dict):
+            events.append(event)
+    return events
+
+
+def _result_event(text: str) -> dict[str, Any]:
+    for event in reversed(_events(text)):
+        if event.get("type") == "result":
+            return event
+    return {}
+
+
+def _session_export(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
-    try:
-        data = json.loads(path.read_text())
-    except json.JSONDecodeError:
-        return {}
-    return data if isinstance(data, dict) else {}
+    for line in path.read_text().splitlines():
+        try:
+            session = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(session, dict):
+            return session
+    return {}

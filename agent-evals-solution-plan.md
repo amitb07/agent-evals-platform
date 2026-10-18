@@ -54,10 +54,9 @@ Rule: **change one thing at a time.**
                                    [Harbor] per trial
                                      agent container: pinned Hermes image, cpu/mem limits,
                                        egress allowed only to api.anthropic.com
-                                       → hermes chat -q "<prompt>" --oneshot --yolo
-                                           --format stream-json --usage-file usage.json
-                                           --model … --provider anthropic --toolsets … --skills … --max-turns N
-                                       → hermes sessions export → session.json
+                                       → hermes -m … --provider anthropic -t … --skills … --yolo --in /app
+                                           chat --query-file prompt --oneshot --format stream-json --max-turns N
+                                       → hermes sessions export → session.jsonl (messages, cost, end reason)
                                      verifier container: clean Node image, no egress,
                                        only /app copied in → TypeScript grader → reward.json
                                                     ▼
@@ -133,21 +132,22 @@ maxTurns: 40
 
 Do not pass `--ignore-rules` (it skips memory and skills). Skills must be self-contained in `SKILL.md` because `skill_view` is disabled.
 
-### The adapter (`harbor/hermes_agent.py`)
+### The adapter (`hermes_harbor/hermes_agent.py`, built and verified on day 1)
 
 ```python
 class HermesAgent(BaseInstalledAgent):
-    name() -> "hermes"
-    MODEL_CONNECTION: api key candidate/destination = ANTHROPIC_API_KEY
-    __init__(logs_dir, model_name, home_bundle, run_flags)      # passed with --ak
-    install(env):   `hermes --version` only (Hermes is in the image)
+    options: arm, home_bundle, toolsets, skills, max_turns     # passed with --ak
+    MODEL_CONNECTION: provider anthropic, key env ANTHROPIC_API_KEY
     run(instruction, env, ctx):
-        upload home_bundle → /opt/data
-        hermes chat -q <instruction> --oneshot --yolo --format stream-json
-               --usage-file /logs/agent/usage.json <run_flags> > /logs/agent/events.jsonl
-        hermes sessions export <session_id> > /logs/agent/session.json
+        empty /opt/data, upload home_bundle, upload instruction file
+        hermes -m … --provider anthropic -t … [--skills …] --yolo --in /app
+               chat --query-file … --oneshot --format stream-json --max-turns N
+               > /logs/agent/events.jsonl
+        list files written under /opt/data → home-writes.txt (isolation evidence)
+        hermes sessions export --format jsonl → /logs/agent/session.jsonl
+        raise a Harbor provider error on rate-limit / overload / auth failures
     populate_context_post_run(ctx):
-        usage.json → tokens, cost;  events + session → trajectory.json
+        result event → tokens; session export → cost, end reason; events → trajectory.json
 ```
 
 A and B are the same class with different `--ak` values, in one Harbor job.

@@ -24,4 +24,6 @@ environment_mode = "separate"
 timeout_sec = 60
 
 [verifier.environment]
+cpus = 1
+memory_mb = 512
 network_mode = "no-network"

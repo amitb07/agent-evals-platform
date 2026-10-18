@@ -374,28 +374,36 @@ Services: `postgres` (16, named volume), `api` (port 3000), `worker` (docker soc
 
 ---
 
-## 16. Open items to confirm on Day 1 (no assumptions made)
+## 16. Day-1 findings that override the sections above (resolved 2026-10-18, see `docs/spike-notes.md`)
 
-| Item | How to confirm | Where it lands |
+| Item | Result | Overrides |
 |---|---|---|
-| Flag to pass a job config file to `harbor run` | `harbor run --help` | §6.4, §9.3 |
-| Hermes `--in /app` sets the terminal cwd (else `terminal.cwd` in config.yaml) | spike run, check tool output paths | §6.1, §6.2 |
-| Hermes toolset names (`terminal`, `file`, …) | `hermes tools` inside the image | §12.5 configs |
-| `hermes sessions export` output format | spike run | §7.4, §11.5 |
-| Seeded `MEMORY.md` is injected with the memory toolset disabled | day-1 check 5 | §6.1 |
-| Docker Desktop supports Harbor's allowlist sidecar | day-1 check 8 | §6.3 `network_mode` |
-| Anthropic SDK structured-output helper name in TypeScript | claude-api skill TS README | §8.2 |
+| Job config flag | `harbor run -c job.yaml`; `-o` must be an **absolute** path | §6.4, §9.3 |
+| Hermes command shape (v0.22.2 in the pinned image) | `hermes -m <model> --provider anthropic -t <toolsets> --yolo --in /app [--skills x] chat --query-file <file> --oneshot --format stream-json --max-turns N`. `--usage-file` exists only for `-z`, so it is not used | §6.2, §7.4 |
+| Tokens, cost, end reason | Tokens from the stream-json `result` event (`tokens.input/output/cache_read/cache_write`); cost (`estimated_cost_usd`, `cost_status`, `cost_source`), `end_reason`, `api_call_count` and verbatim messages from `hermes sessions export --format jsonl --yes --session-id <id> <file>` | §7.5, §9.4 |
+| Adapter kwargs | `arm`, `home_bundle`, `toolsets`, `skills`, `max_turns` (an `options_model` subclass; no free-form `run_flags`) | §6.4, §7.2 |
+| Adapter package | `hermes_harbor/hermes_agent.py`, import path `hermes_harbor.hermes_agent:HermesAgent`, needs `PYTHONPATH=<repo root>`; `harbor/` would shadow Harbor itself | §1.4, §7, §9.8 |
+| Harbor 0.24.0 credential API | `ModelConnectionSpec(default_provider="anthropic", api_key_envs=("ANTHROPIC_API_KEY",))`; key read from `self.model_connection.api_key` and passed as exec env | §7.1 |
+| Hermes file tools | The image sets `HERMES_WRITE_SAFE_ROOT=/opt/data`; the adapter sets it to `/app` or `write_file` is denied | §7.4 |
+| `/opt/data` | Is a volume mount point: wipe contents with `find /opt/data -mindepth 1 -delete`, never `rm -rf /opt/data` | §7.4 |
+| Toolset names | `terminal`, `file`, `code_execution`, `skills`, `memory`, `web`, `browser`, `delegation`, `session_search`, `cronjob`, `todo`, `clarify`, `vision`, `image_gen`, `tts`, `computer_use`, `connections` | §12.5 |
+| Verifier image | Harbor runs every command via `bash -c`: the image must include bash. Our Node image does | §8.4 |
+| `task.toml` | Root keys (`artifacts`) go **before** the first table; `[verifier.environment]` needs its own `cpus` / `memory_mb` under the `limit` policy | §6.3 |
+| Memory and skills isolation | With memory off, a run writes only `state.db`, locks, caches, logs, `SOUL.md`, `skills/.bundled_manifest`; seeded `MEMORY.md` reaches the prompt with `memory_enabled: true` and the `memory` toolset enabled, `write_approval: true` staged nothing. `home-writes.txt` (files newer than the instruction) is saved per trial as evidence | §6.1, §9.4 |
+| Network | Allowlist sidecar works on Docker Desktop: `api.anthropic.com` reachable, `example.com` blocked | §6.3 |
+| Measured (trivial task, Sonnet 5) | ~6 s agent time, ~20 s per trial end to end at concurrency 2, ~12k tokens (95% cache reads), ≈ $0.006 per trial | main plan §10 |
+| Still open | Anthropic SDK structured-output helper name in TypeScript: read the claude-api skill TS README before §8.2 | §8.2 |
 
 ---
 
 ## 17. Build order checklist (work top to bottom; tick as you go)
 
 **Day 1 AM — spike (hard stop 13:00; fallback decision by 18:00)**
-- [ ] 1. Pull `nousresearch/hermes-agent:latest`, record the digest, build `docker/hermes/Dockerfile` from it. (§5)
-- [ ] 2. Run Hermes headless by hand in that image with the Anthropic key: `hermes chat -q … --oneshot --yolo --format stream-json --usage-file`. Confirm the model flag, `hermes tools` names, `--in /app`, `hermes sessions export`. (§5.3, §16)
-- [ ] 3. `uv tool install harbor==0.24.*`; run Harbor's `hello-world` with `-e docker`; read `harbor run --help` for the config-file flag. (§16)
-- [ ] 4. Write `harbor/hermes_agent.py` and a hand-made smoke task dir; run one trial under Harbor; confirm tokens, cost and reward in `result.json`. (§7)
-- [ ] 5. Run the remaining day-1 checks (empty `skills/` with marker, memory off writes nothing, seeded memory visible, allowlist on Docker Desktop, separate verifier ignores a tampered checker). Write `docs/spike-notes.md`. (main plan §12)
+- [x] 1. Pull `nousresearch/hermes-agent:latest`, record the digest, build `docker/hermes/Dockerfile` from it. (§5)
+- [x] 2. Run Hermes headless in that image; confirm flags, toolset names, `--in /app`, `hermes sessions export`. (§5.3, §16)
+- [x] 3. `uv tool install harbor`; hello-world on Docker; config flag is `-c`. (§16)
+- [x] 4. `hermes_harbor/hermes_agent.py` + `spike/tasks/smoke`; two-arm job passes with tokens, cost and reward in `result.json`. (§7)
+- [x] 5. All day-1 checks pass; `docs/spike-notes.md` written. (main plan §12)
 - **Gate:** one Hermes trial under Harbor with tokens, cost and reward. Otherwise switch §7 and §9.3 to a direct Docker runner.
 
 **Day 1 PM — skeleton**

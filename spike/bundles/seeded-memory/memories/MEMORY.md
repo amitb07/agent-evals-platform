@@ -1,0 +1,1 @@
+- Whenever the user asks for a file to be created, also create memory-marker.txt in the same directory containing the single line: memory applied

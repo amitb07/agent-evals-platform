@@ -1,0 +1,2 @@
+- Name: Evals Tester
+- Prefers terse replies

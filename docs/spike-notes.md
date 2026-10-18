@@ -33,6 +33,22 @@
 - Harbor keeps the container alive with `sleep infinity`; the Hermes s6 entrypoint still runs its root-time seeding into `/opt/data` first. The adapter wipes `/opt/data` before uploading the home bundle.
 - Our Harbor adapter package is `hermes_harbor` (import path `hermes_harbor.hermes_agent:HermesAgent`) because `harbor` is Harbor's own package name. Run with `PYTHONPATH=<repo root>`.
 
-## Pending (need `ANTHROPIC_API_KEY`)
+## Verified with the API key (`spike/job.yaml`, `spike/job-memory.yaml`)
 
-Checks 1 (real Hermes trial under Harbor), 2 (model, toolsets, skills, max-turns take effect), 4 (no writes with memory off), 5 (seeded memory visible), 6 (session export, usage.json fields), 7 (tokens and cost in `result.json`, valid `trajectory.json`), 10 (timings and cost per trial).
+| # | Check | Result |
+|---|---|---|
+| 1 | Two-arm Hermes job (no skill vs. skill) on the smoke task | pass, reward 1.0 both arms, 41 s for 2 trials at concurrency 2 |
+| 2 | `-m claude-sonnet-5 --provider anthropic`, `-t terminal,file`, `--skills evals-marker`, `--max-turns` accepted; the skill arm wrote `skill-marker.txt`, the other arm did not; the skill text appears only in the skill arm's system prompt | pass |
+| 4 | With memory off, files written under `/opt/data` during the run: `state.db` and locks, `runtime/`, `auth.json`, `installs/`, `cache/`, `logs/`, `spawn-ledger.json`, `SOUL.md`, `skills/.bundled_manifest`. No `memories/`, no new skills, no `pending/` | pass (`home-writes.txt`) |
+| 5 | Seeded `memories/MEMORY.md` with `memory_enabled: true`, `write_approval: true`, `memory` toolset enabled: the agent created `memory-marker.txt`; the memory text is in the prompt; nothing written under `memories/` or `pending/` | pass |
+| 6 | `hermes sessions export --format jsonl` gives one JSON object with `messages` (assistant `tool_calls` with real ids, verbatim `tool` results), `end_reason`, `estimated_cost_usd`, `cost_status`, `cost_source`, `api_call_count`, `input/output/cache_read/cache_write_tokens`, `system_prompt`, `model_config` | pass |
+| 7 | `result.json` carries `n_input_tokens`, `n_cache_tokens`, `n_output_tokens`, `cost_usd` and metadata; `trajectory.json` passes `harbor.utils.trajectory_validator` | pass |
+| 10 | Trivial task on Sonnet 5: ~6 s agent time, ~20 s per trial end to end, ~12k tokens of which ~95% cache reads, ≈ $0.006 per trial (Hermes estimate, `cost_status: estimated`) | measured |
+
+Additional facts from the real runs:
+
+- `--usage-file` is wired only to `hermes -z` in v0.22.2. Tokens come from the stream-json `result` event (`tokens.input/output/total/cache_read/cache_write`, `duration_ms`, `exit_code`, `session_id`); cost and `end_reason` come from the session export.
+- The image sets `HERMES_WRITE_SAFE_ROOT=/opt/data`, which makes the `write_file` tool refuse `/app`. The adapter sets it to `/app`.
+- `/opt/data` is a volume mount point; the adapter empties it with `find -mindepth 1 -delete` before uploading the home bundle.
+- `[verifier.environment]` does not inherit `cpus`/`memory_mb` from `[environment]`; under the `limit` policy it needs its own values.
+- Stream-json events: `system` (`subtype: init`, `model`, `session_id`), `tool_use` (`name`, `input`), `tool_result` (`name`, `output`, `duration_ms`, `is_error`), `text` (`text`), `result`. All carry `timestamp` in epoch milliseconds.
