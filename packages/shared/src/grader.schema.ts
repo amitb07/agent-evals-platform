@@ -56,6 +56,9 @@ export const graderSchema = z.discriminatedUnion('type', [
 ]);
 export type Grader = z.infer<typeof graderSchema>;
 
+/** Keys the grader writes into `reward.json` besides `gate_passed` and one key per grader id. */
+export const RESERVED_REWARD_KEYS: ReadonlySet<string> = new Set(['score', 'passed']);
+
 export const graderListSchema = z
   .array(graderSchema)
   .min(1)
@@ -64,6 +67,9 @@ export const graderListSchema = z
   })
   .refine((gs) => new Set(gs.map((g) => g.id)).size === gs.length, {
     message: 'Grader ids must be unique',
+  })
+  .refine((gs) => gs.every((g) => !RESERVED_REWARD_KEYS.has(g.id)), {
+    message: `Grader ids must not be one of: ${[...RESERVED_REWARD_KEYS].join(', ')}`,
   });
 
 export const graderSpecSchema = z.strictObject({

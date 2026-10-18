@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test": "pnpm -r --if-present test",
     "db:migrate": "pnpm --filter @evals/db migrate:deploy",
-    "sync": "pnpm --filter @evals/api sync"
+    "sync": "pnpm --filter @evals/api sync",
+    "images:build": "docker build -t evals/hermes-runner:latest docker/hermes && docker build --target verifier -t evals/verifier:latest -f docker/Dockerfile ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

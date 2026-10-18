@@ -80,7 +80,7 @@ export async function generateHarborTask(task: Task, opts: TaskGenOptions): Prom
       '#!/bin/bash',
       'set -euo pipefail',
       'mkdir -p /logs/verifier',
-      'node /grader/cli.js --spec /tests/grader.json --workspace /app --out /logs/verifier',
+      'node /grader/dist/cli.js --spec /tests/grader.json --workspace /app --out /logs/verifier',
       '',
     ].join('\n'),
     'tests/grader.json': `${JSON.stringify(spec, null, 2)}\n`,

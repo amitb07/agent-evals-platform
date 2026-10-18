@@ -35,6 +35,11 @@ describe('graderListSchema', () => {
 });
 
 describe('graderSchema', () => {
+  it('rejects grader ids that clash with reward.json keys', () => {
+    const result = graderListSchema.safeParse([{ ...graders[0], id: 'score', weight: 1 }]);
+    expect(result.error?.issues[0]?.message).toMatch(/must not be one of: score, passed/);
+  });
+
   it('accepts regex and json graders', () => {
     expect(
       graderSchema.safeParse({

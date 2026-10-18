@@ -12,7 +12,8 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
   pnpm install --offline --frozen-lockfile
 RUN pnpm build \
   && pnpm deploy --filter @evals/api --prod --legacy /out/api \
-  && pnpm deploy --filter @evals/worker --prod --legacy /out/worker
+  && pnpm deploy --filter @evals/worker --prod --legacy /out/worker \
+  && pnpm deploy --filter @evals/grader --prod --legacy /out/grader
 
 FROM build AS migrate
 ENV PRISMA_HIDE_UPDATE_MESSAGE=1
@@ -32,6 +33,13 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /out/worker .
 CMD ["node", "dist/main.js"]
+
+# Verifier for Harbor's separate verifier container: bash (Harbor runs commands via `bash -c`),
+# Node for the grader, Python + pytest for task check scripts. Built by `pnpm images:build`.
+FROM node:20-slim AS verifier
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pytest \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/grader /grader
 
 FROM nginx:1.27-alpine AS web
 COPY docker/web/nginx.conf /etc/nginx/conf.d/default.conf

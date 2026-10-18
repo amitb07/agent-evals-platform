@@ -117,7 +117,7 @@ COPY . /tests/
   "tests/test.sh": "#!/bin/bash
 set -euo pipefail
 mkdir -p /logs/verifier
-node /grader/cli.js --spec /tests/grader.json --workspace /app --out /logs/verifier
+node /grader/dist/cli.js --spec /tests/grader.json --workspace /app --out /logs/verifier
 ",
 }
 `;
