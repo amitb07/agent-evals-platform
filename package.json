@@ -11,7 +11,8 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "test": "pnpm -r --if-present test",
-    "db:migrate": "pnpm --filter @evals/db migrate:deploy"
+    "db:migrate": "pnpm --filter @evals/db migrate:deploy",
+    "sync": "pnpm --filter @evals/api sync"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -5,7 +5,7 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main",
-    "test": "jest --passWithNoTests"
+    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=ExperimentalWarning' jest --passWithNoTests"
   },
   "jest": {
     "rootDir": "src",
