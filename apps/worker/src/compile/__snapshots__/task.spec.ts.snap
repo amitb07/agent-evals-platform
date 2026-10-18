@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`generateHarborTask keeps the verifier offline and passes no key when there is no judge 1`] = `
+"schema_version = "1.3"
+artifacts = ["/app"]
+
+[task]
+name = "evals/hello"
+
+[metadata]
+category = "tools"
+
+[environment]
+cpus = 2
+memory_mb = 2048
+workdir = "/app"
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 120
+user = "hermes"
+network_mode = "allowlist"
+allowed_hosts = ["api.anthropic.com"]
+
+[verifier]
+environment_mode = "separate"
+timeout_sec = 180
+
+[verifier.environment]
+cpus = 1
+memory_mb = 1024
+network_mode = "no-network"
+"
+`;
+
+exports[`generateHarborTask writes the Harbor task layout for a judged task 1`] = `
+{
+  "environment/Dockerfile": "FROM evals/hermes-runner:test
+COPY --chown=10000:10000 fixtures/ /app/
+",
+  "environment/fixtures/data/sales.csv": "region,revenue
+north,10
+south,5
+",
+  "instruction.md": "Read data/sales.csv and write report.md with total revenue per region.
+",
+  "solution/solve.sh": "#!/bin/bash
+echo "| north | 10 |" > /app/report.md
+",
+  "task.toml": "schema_version = "1.3"
+artifacts = ["/app"]
+
+[task]
+name = "evals/csv-summary"
+
+[metadata]
+category = "tools"
+
+[environment]
+cpus = 2
+memory_mb = 2048
+workdir = "/app"
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 300
+user = "hermes"
+network_mode = "allowlist"
+allowed_hosts = ["api.anthropic.com"]
+
+[verifier]
+environment_mode = "separate"
+timeout_sec = 180
+env = { ANTHROPIC_API_KEY = "\${ANTHROPIC_API_KEY}", JUDGE_MODEL = "\${JUDGE_MODEL}" }
+
+[verifier.environment]
+cpus = 1
+memory_mb = 1024
+network_mode = "allowlist"
+allowed_hosts = ["api.anthropic.com"]
+",
+  "tests/Dockerfile": "FROM evals/verifier:test
+COPY . /tests/
+",
+  "tests/checks/check_report.js": "process.exit(0);
+",
+  "tests/grader.json": "{
+  "taskSlug": "csv-summary",
+  "passThreshold": 0.8,
+  "graders": [
+    {
+      "type": "file_exists",
+      "id": "report-exists",
+      "weight": 0.2,
+      "gate": false,
+      "path": "report.md"
+    },
+    {
+      "type": "command",
+      "id": "totals-correct",
+      "weight": 0.6,
+      "gate": true,
+      "run": "node /tests/checks/check_report.js report.md"
+    },
+    {
+      "type": "llm_judge",
+      "id": "clear-table",
+      "weight": 0.2,
+      "rubric": "Is the report clear and formatted as a table?",
+      "files": [
+        "report.md"
+      ]
+    }
+  ]
+}
+",
+  "tests/test.sh": "#!/bin/bash
+set -euo pipefail
+mkdir -p /logs/verifier
+node /grader/cli.js --spec /tests/grader.json --workspace /app --out /logs/verifier
+",
+}
+`;

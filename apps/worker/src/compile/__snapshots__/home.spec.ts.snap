@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`compileHome seeds memory files and enables memory with staged writes 1`] = `
+{
+  ".no-bundled-skills": "",
+  "config.yaml": "agent:
+  max_turns: 40
+  disabled_toolsets:
+    - skills
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  write_approval: true
+auxiliary:
+  background_review:
+    enabled: false
+database:
+  journal_mode: delete
+terminal:
+  cwd: /app
+",
+  "memories/MEMORY.md": "The user wants reports in British English.
+",
+  "memories/USER.md": "Name: Sam
+",
+}
+`;
+
+exports[`compileHome writes a memory-off bundle with no bundled skills 1`] = `
+{
+  ".no-bundled-skills": "",
+  "config.yaml": "agent:
+  max_turns: 40
+  disabled_toolsets:
+    - memory
+    - skills
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+auxiliary:
+  background_review:
+    enabled: false
+database:
+  journal_mode: delete
+terminal:
+  cwd: /app
+",
+}
+`;

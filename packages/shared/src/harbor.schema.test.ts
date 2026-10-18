@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import result from './__fixtures__/harbor-result.json';
-import { classifyException, harborTrialResultSchema } from './harbor.schema';
+import {
+  classifyException,
+  harborTaskName,
+  harborTrialResultSchema,
+  taskSlugFromHarborName,
+} from './harbor.schema';
 
 describe('harborTrialResultSchema', () => {
   it('parses a real Harbor 0.24 result', () => {
@@ -45,5 +50,16 @@ describe('classifyException', () => {
     ['SomethingNewError', 'unclassified', false],
   ])('%s -> %s (rewardValid %s)', (type, failureCause, rewardValid) => {
     expect(classifyException(type)).toEqual({ failureCause, rewardValid });
+  });
+});
+
+describe('harborTaskName', () => {
+  it('round-trips a task slug', () => {
+    expect(harborTaskName('csv-summary')).toBe('evals/csv-summary');
+    expect(taskSlugFromHarborName(harborTaskName('csv-summary'))).toBe('csv-summary');
+  });
+
+  it('rejects foreign task names', () => {
+    expect(taskSlugFromHarborName('other/csv-summary')).toBeNull();
   });
 });

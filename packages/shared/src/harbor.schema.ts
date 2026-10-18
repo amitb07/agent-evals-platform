@@ -152,3 +152,16 @@ export function classifyException(exceptionType: string | null | undefined): {
   const failureCause = FAILURE_CAUSE_BY_EXCEPTION.get(exceptionType) ?? 'unclassified';
   return { failureCause, rewardValid: REWARD_VALID_CAUSES.has(failureCause) };
 }
+
+const HARBOR_TASK_NAMESPACE = 'evals';
+
+/** The `[task] name` the generator writes into `task.toml`; Harbor reports it as `task_name`. */
+export function harborTaskName(taskSlug: string): string {
+  return `${HARBOR_TASK_NAMESPACE}/${taskSlug}`;
+}
+
+/** Inverse of `harborTaskName`; returns null for tasks this platform did not generate. */
+export function taskSlugFromHarborName(taskName: string): string | null {
+  const prefix = `${HARBOR_TASK_NAMESPACE}/`;
+  return taskName.startsWith(prefix) ? taskName.slice(prefix.length) : null;
+}

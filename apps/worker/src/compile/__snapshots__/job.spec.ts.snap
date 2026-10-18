@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`jobConfig describes both arms in one Harbor job 1`] = `
+{
+  "agents": [
+    {
+      "import_path": "hermes_harbor.hermes_agent:HermesAgent",
+      "kwargs": {
+        "arm": "A",
+        "home_bundle": "/data/bundles/base-aaaa",
+        "max_turns": 40,
+        "skills": "",
+        "toolsets": "terminal,file",
+      },
+      "model_name": "anthropic/claude-sonnet-5",
+    },
+    {
+      "import_path": "hermes_harbor.hermes_agent:HermesAgent",
+      "kwargs": {
+        "arm": "B",
+        "home_bundle": "/data/bundles/b-bbbb",
+        "max_turns": 40,
+        "skills": "changelog-format",
+        "toolsets": "terminal,file",
+      },
+      "model_name": "anthropic/claude-sonnet-5",
+    },
+  ],
+  "datasets": [
+    {
+      "path": "/data/harbor-tasks/exp-1",
+    },
+  ],
+  "environment": {
+    "cpu_enforcement_policy": "limit",
+    "memory_enforcement_policy": "limit",
+    "type": "docker",
+  },
+  "job_name": "e1-skills",
+  "n_attempts": 3,
+  "n_concurrent_trials": 4,
+  "retry": {
+    "max_retries": 2,
+  },
+}
+`;
