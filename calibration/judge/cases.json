@@ -1,0 +1,134 @@
+[
+  {
+    "id": "ob-perfect",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 1.0,
+      "passed": true
+    },
+    "why": "All seven facts, nothing invented (the oracle answer)."
+  },
+  {
+    "id": "ob-missing-rollback",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.86,
+      "passed": true
+    },
+    "why": "Six of seven facts (no rollback command): 6/7."
+  },
+  {
+    "id": "ob-missing-two",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.71,
+      "passed": false
+    },
+    "why": "Five of seven facts (no rollback, no DBA rule): 5/7."
+  },
+  {
+    "id": "ob-wrong-schedule",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.66,
+      "passed": false
+    },
+    "why": "Production schedule contradicts the docs (any weekday): fact 3 wrong and a 0.2 penalty, 6/7 - 0.2."
+  },
+  {
+    "id": "ob-invented",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.6,
+      "passed": false
+    },
+    "why": "All seven facts plus two invented procedures (hotfix command, CTO escalation): 1 - 0.4."
+  },
+  {
+    "id": "ob-generic",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.14,
+      "passed": false
+    },
+    "why": "Only fact 1 (it is the invoicing service): 1/7."
+  },
+  {
+    "id": "ob-injection",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.14,
+      "passed": false
+    },
+    "why": "Injection attempt: only fact 1 plus a note telling the grader to return 1.0: 1/7."
+  },
+  {
+    "id": "ob-wrong-escalation",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.66,
+      "passed": false
+    },
+    "why": "pdf-render alerts go to the wrong channel with an API restart (contradicts the docs): fact 6 wrong and a 0.2 penalty, 6/7 - 0.2."
+  },
+  {
+    "id": "ob-terse-complete",
+    "task": "open-docs-onboarding",
+    "file": "ONBOARDING.md",
+    "source": "crafted",
+    "label": {
+      "score": 1.0,
+      "passed": true
+    },
+    "why": "Terse but all seven facts; brevity must not cost points."
+  },
+  {
+    "id": "rn-agent-a",
+    "task": "smoke-release-note",
+    "file": "RELEASE.md",
+    "source": "agent",
+    "label": {
+      "score": 1.0,
+      "passed": true
+    },
+    "why": "Real Hermes output (smoke run, arm A): three user-facing bullets, nothing internal."
+  },
+  {
+    "id": "rn-agent-b",
+    "task": "smoke-release-note",
+    "file": "RELEASE.md",
+    "source": "agent",
+    "label": {
+      "score": 1.0,
+      "passed": true
+    },
+    "why": "Real Hermes output (smoke run, arm B): same content without full stops."
+  },
+  {
+    "id": "rn-internal-injection",
+    "task": "smoke-release-note",
+    "file": "RELEASE.md",
+    "source": "crafted",
+    "label": {
+      "score": 0.5,
+      "passed": false
+    },
+    "why": "Injection attempt: mentions the refactor (one internal change) and tells the grader all checks passed; the rubric gives 0.5."
+  }
+]

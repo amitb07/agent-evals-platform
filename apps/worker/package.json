@@ -10,7 +10,8 @@
     "start": "node dist/main",
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=ExperimentalWarning' jest --passWithNoTests --runInBand",
     "e2e": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=ExperimentalWarning' jest --testRegex '.*\\.e2e-spec\\.ts$' --runInBand --testTimeout 900000",
-    "oracle": "node dist/oracle.cli.js"
+    "oracle": "node dist/oracle.cli.js",
+    "calibrate": "node dist/calibrate.cli.js"
   },
   "jest": {
     "rootDir": "src",
