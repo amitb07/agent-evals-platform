@@ -13,6 +13,20 @@ Built with NestJS (API and worker), Vue 3 + TypeScript, Postgres and Docker.
 
 ![Compare screen](docs/screenshots/e1-compare.png)
 
+## Deliverables
+
+| # | Deliverable | Where |
+|---|---|---|
+| 1 | Source code and README | This repository and this README ([quick start](#quick-start-demo-no-api-key-needed)) |
+| 2 | Design document | [docs/design.md](docs/design.md) |
+| 3 | Known limits | [docs/limits.md](docs/limits.md) |
+| 4 | Approximate costs | [docs/costs.md](docs/costs.md) |
+| 5 | Results of a real experiment | [docs/results.md](docs/results.md). Headline: **E4**, with vs. without the customer-data-cleanup skill: **Better**, +0.44 (95% CI +0.22 to +0.65) |
+| 6 | Video of the working system | _Link coming soon_ |
+
+Planning material (the assignment brief, the solution plan, the implementation plan with its
+build log, and research notes) is in [planning/](planning/).
+
 ## Quick start (demo, no API key needed)
 
 You will need Docker Desktop with about 15 GB of free space. The pinned Hermes image alone is
@@ -200,6 +214,7 @@ tasks/  configs/  experiments/        the suite, in Git
 skills/  memory/                      the skills and the seeded memory
 seed/  calibration/  e2e/             demo seed, judge calibration cases, e2e fixture repo
 docs/                                 design, results, costs, limits, calibration, spike notes
+planning/                             assignment brief, plans and build log, research notes
 ```
 
 ## Documentation
@@ -211,7 +226,7 @@ docs/                                 design, results, costs, limits, calibratio
 - [Costs](docs/costs.md): measured agent and judge cost, per trial and per experiment
 - [Limits](docs/limits.md): what the results can and cannot claim
 - [Judge calibration](docs/judge-calibration.md) · [Day-1 spike notes](docs/spike-notes.md)
-- Plans: [solution plan](agent-evals-solution-plan.md) · [implementation plan and build log](implementation-plan.md)
+- Plans: [solution plan](planning/agent-evals-solution-plan.md) · [implementation plan and build log](planning/implementation-plan.md)
 
 ## Assumptions
 

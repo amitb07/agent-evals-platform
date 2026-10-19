@@ -6,7 +6,7 @@ baseline (A) and k times with the candidate (B). It then gives a verdict of **Be
 or **Inconclusive**, with a 95% confidence interval. You can open every run to see **why** it
 passed or failed.
 
-![Architecture](../architecture-diagram.png)
+![Architecture](architecture-diagram.png)
 
 Note: the diagram shows step 9 (statistics) in the worker. In the actual build, the API computes
 the statistics when they are read (see [Statistics](#statistics)).
@@ -228,4 +228,4 @@ out of date. `pnpm rescore` uses the same function for sensitivity checks.
 | Jest | 30 | MIT |
 
 These versions come from `pnpm-lock.yaml` and `docker/`. Notes on the toolchain (why NestJS 11,
-Node 20.19+ and TypeScript 6) are in `implementation-plan.md` §16.
+Node 20.19+ and TypeScript 6) are in `planning/implementation-plan.md` §16.

@@ -18,7 +18,7 @@ terminal shows the same prompt run twice, giving two different answers.
 
 ## 2. Our proposal (0:35 – 1:30)
 
-**On screen:** `architecture-diagram.png`. Zoom into each area as it is mentioned: Define →
+**On screen:** `docs/architecture-diagram.png`. Zoom into each area as it is mentioned: Define →
 Control plane → Execution → Decide & explain.
 
 > Our answer is an A/B testing platform for Hermes Agent.

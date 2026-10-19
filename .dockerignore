@@ -7,8 +7,8 @@
 data
 jobs
 spike
-research_notes
-reports
+planning
+docs
 *.pdf
 *.png
 *.html
