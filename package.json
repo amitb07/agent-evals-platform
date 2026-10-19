@@ -15,6 +15,7 @@
     "sync": "pnpm --filter @evals/api sync",
     "oracle": "pnpm --filter @evals/worker build && pnpm --filter @evals/worker oracle",
     "calibrate": "pnpm --filter @evals/worker build && pnpm --filter @evals/worker calibrate",
+    "rescore": "pnpm --filter @evals/api build && pnpm --filter @evals/api rescore",
     "images:build": "docker build -t evals/hermes-runner:latest docker/hermes && docker build --target verifier -t evals/verifier:latest -f docker/Dockerfile .",
     "e2e": "pnpm images:build && pnpm --filter @evals/worker e2e"
   },

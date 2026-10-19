@@ -8,6 +8,16 @@ import sys
 EXPECTED = {"north": 2150.75, "south": 2080.50, "east": 1790.35, "west": 1705.40}
 
 
+def amount(text):
+    """Parses 2150.75, 2,150.75, $2,150.75, 2.150,75 and 2.150,75 € alike."""
+    s = re.sub(r"[^0-9,.\-]", "", text)
+    if "," in s and s.rfind(",") > s.rfind("."):
+        s = s.replace(".", "").replace(",", ".")
+    else:
+        s = s.replace(",", "")
+    return float(s) if s else None
+
+
 def region_rows():
     rows = []
     for line in open("report.md", encoding="utf-8"):
@@ -16,8 +26,7 @@ def region_rows():
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         name = re.sub(r"[*_`]", "", cells[0]).strip().lower()
         if name in EXPECTED and len(cells) >= 2:
-            number = re.sub(r"[^0-9.\-]", "", cells[-1].replace(",", ""))
-            rows.append((name, float(number) if number else None))
+            rows.append((name, amount(cells[-1])))
     return rows
 
 
