@@ -1,0 +1,10 @@
+# E2 baseline: shell only, no file tools.
+id: base-tools-terminal
+name: Base · [terminal]
+hermesImageDigest: 'sha256:36099926da316742423544e055d4734777105ffe6341873af5459b957d0c2919'
+model: claude-sonnet-5
+provider: anthropic
+skills: []
+toolsets: [terminal]
+memory: { mode: off }
+maxTurns: 30

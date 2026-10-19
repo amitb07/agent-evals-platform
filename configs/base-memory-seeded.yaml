@@ -1,0 +1,12 @@
+# E3 candidate: memory seeded with the user's preferences (memory/seeded), writes staged only.
+id: base-memory-seeded
+name: Base · memory seeded
+hermesImageDigest: 'sha256:36099926da316742423544e055d4734777105ffe6341873af5459b957d0c2919'
+model: claude-sonnet-5
+provider: anthropic
+skills: []
+toolsets: [terminal, file]
+memory:
+  mode: seeded
+  files: [memory/seeded/MEMORY.md, memory/seeded/USER.md]
+maxTurns: 30

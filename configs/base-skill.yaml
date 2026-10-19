@@ -1,0 +1,10 @@
+# E1 candidate: base plus the house changelog skill (skills/changelog-format).
+id: base-skill
+name: Base + changelog-format skill
+hermesImageDigest: 'sha256:36099926da316742423544e055d4734777105ffe6341873af5459b957d0c2919'
+model: claude-sonnet-5
+provider: anthropic
+skills: [changelog-format]
+toolsets: [terminal, file]
+memory: { mode: off }
+maxTurns: 30

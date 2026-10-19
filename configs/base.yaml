@@ -1,0 +1,10 @@
+# E1 baseline: the reference config every experiment changes one thing from.
+id: base
+name: Base · Sonnet 5
+hermesImageDigest: 'sha256:36099926da316742423544e055d4734777105ffe6341873af5459b957d0c2919'
+model: claude-sonnet-5
+provider: anthropic
+skills: []
+toolsets: [terminal, file]
+memory: { mode: off }
+maxTurns: 30

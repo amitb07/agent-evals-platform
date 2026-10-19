@@ -1,0 +1,28 @@
+# Pre-registered before the run (plan §9, §12.9). Do not edit after the run starts; a changed
+# design gets a new experiment id.
+id: e2-tools
+name: E2 · file toolset
+hypothesis: >-
+  B (terminal plus file tools) scores at least as high as A (terminal only), with fewer tool errors on the file-editing tasks; we expect a small effect, so Inconclusive is a likely and acceptable outcome.
+factor: tools
+taskIds:
+  - tools-region-report
+  - tools-log-triage
+  - tools-config-migrate
+  - coding-fix-slugify
+  - coding-roman
+  - skill-changelog-release
+  - skill-changelog-breaking
+  - skill-changelog-prs
+  - memory-expenses-csv
+  - memory-invoice-summary
+  - memory-vendor-email
+  - open-docs-onboarding
+baselineConfigId: base-tools-terminal
+candidateConfigId: base-tools-terminal-file
+repeats: 3
+concurrency: 4
+passThreshold: 0.8
+costCapUsd: 15
+seed: 202
+heldOutTaskIds: []
