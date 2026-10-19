@@ -296,6 +296,7 @@ const draft = {
     expect(detail.body).toMatchObject({
       taskSlug: 'csv-summary',
       configSlug: 'base',
+      prompt: expect.any(String),
       grades: [{ graderId: 'report-exists', evidence: ['report.md'] }],
       manifest: { harborVersion: '0.24.0' },
     });

@@ -7,6 +7,8 @@ import type {
   ExperimentSummary,
   TaskSummary,
   TrialDetail,
+  TrialDiff,
+  TrialFile,
   TrialSummary,
   Arm,
 } from '@evals/shared';
@@ -61,6 +63,22 @@ export const api = {
     return request<TrialSummary[]>(`/experiments/${id}/trials?${params.toString()}`);
   },
   trial: (id: string) => request<TrialDetail>(`/trials/${id}`),
+  trialEvents: (id: string) => request<unknown[]>(`/trials/${id}/events`),
+  trialSession: (id: string) => request<unknown[]>(`/trials/${id}/session`),
+  trialDiff: (id: string) => request<TrialDiff>(`/trials/${id}/diff`),
+  trialFiles: (id: string) => request<TrialFile[]>(`/trials/${id}/files`),
+  /** A workspace file as text (the API serves it as text/plain or bytes, never JSON). */
+  trialFileText: async (id: string, path: string): Promise<string> => {
+    const url = `/api/v1/trials/${id}/files/${path.split('/').map(encodeURIComponent).join('/')}`;
+    const res = await fetch(url).catch((error: unknown) => {
+      throw new ApiRequestError(`Cannot reach the API: ${String(error)}`, 0);
+    });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => null)) as { error?: string } | null;
+      throw new ApiRequestError(body?.error ?? `${res.status} ${res.statusText}`, res.status);
+    }
+    return res.text();
+  },
 };
 
 export const errorMessage = (error: unknown): string =>

@@ -27,7 +27,7 @@ export class TrialsService {
     const t = await this.prisma.trial.findUnique({
       where: { id },
       include: {
-        task: { select: { slug: true } },
+        task: { select: { slug: true, prompt: true } },
         config: { select: { slug: true } },
         grades: { orderBy: { graderId: 'asc' } },
         manifest: true,
@@ -38,6 +38,7 @@ export class TrialsService {
       ...toTrialSummary(t),
       experimentId: t.experimentId,
       configSlug: t.config.slug,
+      prompt: t.task.prompt,
       turnExitReason: t.turnExitReason,
       exitCode: t.exitCode,
       tokensIn: t.tokensIn,

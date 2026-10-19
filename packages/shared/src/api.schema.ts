@@ -123,6 +123,8 @@ export type TrialSummary = z.infer<typeof trialSummarySchema>;
 export const trialDetailSchema = trialSummarySchema.extend({
   experimentId: z.uuid(),
   configSlug: slugSchema,
+  /** The task prompt the agent received. */
+  prompt: z.string(),
   turnExitReason: z.string().nullable(),
   exitCode: z.int().nullable(),
   tokensIn: z.int().nullable(),
