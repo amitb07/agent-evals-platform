@@ -130,41 +130,65 @@ export type TrialDetail = z.infer<typeof trialDetailSchema>;
 export const trialDiffSchema = z.object({ diff: z.string() });
 export type TrialDiff = z.infer<typeof trialDiffSchema>;
 
+/** `null` when no task has valid trials in both arms. */
 const confidenceIntervalSchema = z.object({
-  effect: z.number(),
-  ciLow: z.number(),
-  ciHigh: z.number(),
+  effect: z.number().nullable(),
+  ciLow: z.number().nullable(),
+  ciHigh: z.number().nullable(),
 });
 
 const armMetricsSchema = z.object({
-  passAt1: unitIntervalSchema,
-  passAtK: unitIntervalSchema,
-  passHatK: unitIntervalSchema,
-  costPerTrialUsd: z.number(),
+  /** Trials that finished (graded, failed or ingest_failed); pending and running ones are ignored. */
+  finished: z.int(),
+  valid: z.int(),
+  /** Finished trials whose reward is invalid (infra failures); left out of every score. */
+  excluded: z.int(),
+  /** Valid trials whose gate check failed. */
+  gateFailures: z.int(),
+  /** Finished trials by failure cause, valid failures (agent budget) included. */
+  failures: z.partialRecord(failureCauseSchema, z.int()),
+  passAt1: unitIntervalSchema.nullable(),
+  passAtK: unitIntervalSchema.nullable(),
+  passHatK: unitIntervalSchema.nullable(),
+  costUsd: z.number(),
+  costPerTrialUsd: z.number().nullable(),
   costPerPassUsd: z.number().nullable(),
   meanDurationMs: z.number().nullable(),
   meanTokens: z.number().nullable(),
-  excluded: z.int(),
 });
+export type ArmMetrics = z.infer<typeof armMetricsSchema>;
+
+export const taskStatsSchema = z.object({
+  taskSlug: slugSchema,
+  category: taskCategorySchema,
+  heldOut: z.boolean(),
+  nA: z.int(),
+  nB: z.int(),
+  meanA: z.number().nullable(),
+  meanB: z.number().nullable(),
+  delta: z.number().nullable(),
+  sdA: z.number().nullable(),
+  sdB: z.number().nullable(),
+  flaky: z.boolean(),
+  costA: z.number().nullable(),
+  costB: z.number().nullable(),
+});
+export type TaskStats = z.infer<typeof taskStatsSchema>;
 
 export const experimentStatsSchema = confidenceIntervalSchema.extend({
   verdict: verdictSchema,
+  /** Why the verdict is inconclusive regardless of the CI (too few paired tasks), else null. */
+  verdictNote: z.string().nullable(),
   twoStage: confidenceIntervalSchema,
+  /** Retrospective minimum detectable effect at 95% confidence and 80% power. */
   mde: z.number().nullable(),
+  /** Tasks with valid trials in both arms; the bootstrap unit. */
   nTasks: z.int(),
   k: z.int(),
-  tasks: z.array(
-    z.object({
-      taskSlug: slugSchema,
-      category: taskCategorySchema,
-      meanA: z.number().nullable(),
-      meanB: z.number().nullable(),
-      delta: z.number().nullable(),
-      sdA: z.number().nullable(),
-      sdB: z.number().nullable(),
-      flaky: z.boolean(),
-    }),
-  ),
+  passThreshold: unitIntervalSchema,
+  iterations: z.int(),
+  seed: z.int(),
+  tasks: z.array(taskStatsSchema),
   arms: z.object({ A: armMetricsSchema, B: armMetricsSchema }),
   computedAt: isoDateTimeSchema,
 });
