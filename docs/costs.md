@@ -10,12 +10,15 @@ All numbers were measured on 2026-10-18/19. Agent cost is Hermes' own per-sessio
 | E1 skills, agent | 72 trials | $2.24 |
 | E2 tools, agent | 72 trials | $2.72 |
 | E3 memory, agent | 72 trials | $2.43 |
+| E4 cleanup skill (v2), agent | 48 trials | $7.38 |
+| E4 v1, stopped after a grader fix, agent | 12 trials | $1.59 |
 | Smoke run (step 18), agent | 4 trials | $0.08 |
 | Day-1 spike, agent | a handful of trivial trials (≈ $0.006 each) | < $0.10 |
 | Judge (`claude-opus-5`): E1–E3, smoke, oracle runs, calibration, injection checks | ≈ 50 calls × $0.015 | ≈ $0.75 |
-| **Total** | | **≈ $8.3** |
+| **Total** | | **≈ $17.3** |
 
-The budget was $20–50. Local infrastructure (Docker Desktop on a laptop) cost nothing extra.
+The budget was $20–50. The cleanup tasks of E4 are heavier than the E1–E3 suite (the agent
+writes and runs a script): $0.13–0.27 per cleanup trial, 2–4 minutes each. Local infrastructure (Docker Desktop on a laptop) cost nothing extra.
 
 ## Per trial (E1–E3, 216 trials, `claude-sonnet-5`)
 

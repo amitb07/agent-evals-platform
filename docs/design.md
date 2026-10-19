@@ -72,6 +72,23 @@ verifier images.
 7. **Decide and explain.** The API computes statistics on read; the UI shows Compare and Run
    detail.
 
+## Skill configs from the UI
+
+`POST /configs` creates a config from a base config plus one skill, either an existing one or a
+new one written in the request; `GET /skills` lists skills. Rules:
+
+- The new config copies every field of the base and appends the skill, so it differs from the
+  base only in skills and is always a valid candidate for a *skills* experiment.
+- New skills are written to `DATA_DIR/skills/<name>/SKILL.md` (the repo is mounted read-only).
+  The front matter (`name`, `description`, `version`) is generated; the body is the user's
+  Markdown. A name taken by a repo skill or a custom skill is refused.
+- The worker's compiler takes a skill from `skills/` first and from `DATA_DIR/skills` second.
+  The skill's bytes go into the content-addressed home bundle, so the run manifest's bundle hash
+  pins exactly what Hermes saw.
+- UI configs are stored with `yamlHash = "ui:<sha256>"`. The YAML sync never deletes or
+  overwrites them, unless a YAML file later uses the same id.
+- If storing the config fails after a new skill was written, the skill file is removed again.
+
 ## Isolation: making A and B comparable
 
 Hermes learns by default, so every learning path is off and nothing survives a trial:

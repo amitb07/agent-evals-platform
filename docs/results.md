@@ -1,4 +1,4 @@
-# Results: E1–E3
+# Results: E1–E4
 
 Run on 2026-10-19 on the compose stack (Docker Desktop, Apple silicon), Hermes v0.22.2
 (pinned digest), agent `claude-sonnet-5`, judge `claude-opus-5`, Harbor 0.24.0. Each experiment:
@@ -15,8 +15,10 @@ all three experiments, so every number and trial below can be opened in the UI
 | **E2 tools** | `[terminal]` → `[terminal, file]` | Inconclusive (tool errors 28 → 14) | −0.017 | [−0.039, 0.000] | 0.034 | $2.72 | 19 min |
 | **E3 memory** | memory off → memory seeded | Inconclusive (as recorded) | +0.151 | [−0.056, +0.389] | 0.332 | $2.43 | 17 min |
 | E3, corrected grader | same | **Better** (sensitivity, see below) | +0.193 | [+0.010, +0.407] | 0.291 | | |
+| **E4 cleanup skill** (showcase) | no skill → `customer-data-cleanup` skill | **Better** | **+0.442** | **[+0.223, +0.650]** | 0.330 | $7.38 | 70 min |
 
-No trial was excluded and no infrastructure failure occurred in any of the 216 trials.
+No trial was excluded and no infrastructure failure occurred in any of the 264 trials. E1–E3
+use the 12-task suite (72 trials each); E4 uses 6 cleanup tasks plus 2 controls (48 trials).
 
 **In one paragraph:** both the skill and the seeded memory do exactly what they should on the
 tasks that depend on them. B scores 1.00 on every one of those tasks in every repeat, including
@@ -26,6 +28,67 @@ a between-task spread that large, the bootstrap CI reaches zero (MDE ≈ 0.32). 
 (E2) makes no difference, because the shell already covers every task.
 
 ![E1 Compare screen](screenshots/e1-compare.png)
+
+## E4: customer data cleanup skill (showcase)
+
+**Why a fourth experiment.** E1 and E3 showed the skill and the memory working on their target
+tasks, while the 12-task estimand diluted the effect. E4 was designed so the skill's own tasks
+are most of the suite. It tests a second skill, `skills/customer-data-cleanup`: a house standard
+for cleaning customer exports (column mapping, E.164 phones, ISO countries, UTC timestamps,
+test-account removal, a duplicate-merge rule, a fixed report). The skill was committed before
+its tasks were written (commit `9e90965`).
+
+Hypothesis (pre-registered, `experiments/e4-cleanup-skill-v2.yaml`): *B scores higher than A on
+the six cleanup tasks, including the two held-out ones, and the same on the two control tasks;
+with eight tasks the suite-level effect is positive with a 95% CI above 0.*
+
+![E4 Compare screen](screenshots/e4-compare.png)
+
+| Task | A | B | Δ |
+|---|---|---|---|
+| cleanup-basic | 0.77 | 1.00 | +0.23 |
+| cleanup-duplicates | 0.40 | 1.00 | +0.60 |
+| cleanup-test-accounts | 0.40 | 1.00 | +0.60 |
+| cleanup-semicolon-export | 0.43 | 1.00 | +0.57 |
+| cleanup-two-exports (held out) | 0.05 | 1.00 | +0.95 |
+| cleanup-json-leads (held out) | 0.42 | 1.00 | +0.58 |
+| tools-region-report (control) | 1.00 | 1.00 | 0.00 |
+| coding-roman (control) | 1.00 | 1.00 | 0.00 |
+
+| Part of the hypothesis | Outcome |
+|---|---|
+| B higher on all six cleanup tasks, held-out included | ✅ B 1.00 in all 18 cleanup trials |
+| Controls unchanged | ✅ both 1.00 in both arms |
+| Suite-level CI above 0 | ✅ **Better**, +0.442 [+0.223, +0.650]; two-stage [+0.223, +0.652] |
+
+Per arm: pass@1 33% → **100%** (B passed 24 of 24 trials); cost per trial $0.183 → $0.125; cost
+per pass $0.549 → $0.125; failed tool calls 32 → 7. On cleanup tasks B's agent also finishes
+faster (median agent time 95 s vs 156 s). Wall-clock trial duration is not comparable here: one
+B trial waited 41 minutes in Harbor's verifier phase (infrastructure, not the agent).
+
+Why A fails (failed checks over its 18 cleanup trials): without the standard, Hermes writes a
+careful but different cleanup.
+- **Report format** (18 of 18): it invents its own report keys.
+- **Kept records** (14): it merges duplicates by its own rule. It keeps the older record (ids
+  201/203 instead of 209/211), or merges two customers with no email by name, which the standard
+  forbids.
+- **Timestamps** (13): `+00:00` instead of `Z`, or a non-standard column name.
+- **Phones** (10): taken from the wrong duplicate.
+- **Header** (9): input column names (`customer_id`, `full_name`) or extra columns.
+- In the held-out two-export task it also created new ids (`CUST-0001`…) and kept the originals
+  in extra columns.
+
+**Robustness.** The content checks match rows by `id`, so A's new ids on `cleanup-two-exports`
+also zeroed its email, phone, country and timestamp checks there. Re-grading those three trials
+with rows matched by email gives A 0.50, 0.35 and 0.50; `pnpm rescore` then gives **Better,
++0.392 [+0.208, +0.546]**. The verdict does not depend on that choice.
+
+**v1 was stopped.** The first run (`e4-cleanup-skill`) was stopped after 12 of 48 trials
+($1.59). Its content checks read only the standard column names, so a baseline that kept
+`customer_id` got 0 for correct content (0.05 instead of 0.40–0.50 on two tasks). The checks now
+accept the standard's column aliases and only `format` requires the exact header. The design was
+otherwise unchanged and re-registered as v2 before it ran. v1 stays in the database as a stopped
+run and is not in the demo seed.
 
 ## How to read the numbers
 
@@ -184,11 +247,11 @@ the same task and repeat. Each "why" is the failed checks' own messages, shown i
 ## Reproduce
 
 ```sh
-docker compose up                        # demo: the seed loads E1–E3 into an empty database
+docker compose up                        # demo: the seed loads E1–E4 into an empty database
 # with ANTHROPIC_API_KEY in .env, open an experiment in the UI and press Run, or:
 curl -X POST localhost:3000/api/v1/experiments/<id>/run
 pnpm rescore <experiment-id> <trial-id>=<score> ...   # sensitivity analysis, nothing written
 ```
 
 Raw stats as served by the API: `results-data/e1-skills-stats.json`, `e2-tools-stats.json`,
-`e3-memory-stats.json`.
+`e3-memory-stats.json`, `e4-cleanup-skill-v2-stats.json`.

@@ -20,10 +20,10 @@ docker compose up
 ```
 
 Open <http://localhost:8080>. The first build takes several minutes. On first start the API
-loads a demo seed with three finished experiments (216 real trials), so every screen works
+loads a demo seed with four finished experiments (264 real trials), so every screen works
 without an API key:
 
-- **Experiments**: list, progress, spend; **New experiment** form.
+- **Experiments**: list, progress, spend; **New experiment** form; **New skill config**.
 - **Compare**: verdict, effect, 95% CI, MDE, per-task deltas, score vs. cost, pass@k by arm.
 - **Run detail**: outcome in one line, transcript (tool calls, arguments, outputs), grades with
   reasons, A vs. B on the same task, workspace diff and files.
@@ -32,18 +32,26 @@ Health check: <http://localhost:3000/api/v1/health>.
 
 ## Results
 
-Three pre-registered experiments, 72 trials each, Sonnet 5 agent, Opus 5 judge, $7.4 of agent
-spend in total ([full write-up](docs/results.md)):
+Four pre-registered experiments, Sonnet 5 agent, Opus 5 judge, $14.8 of agent spend in total
+([full write-up](docs/results.md)):
 
 | Experiment | Change | Verdict | Effect [95% CI] |
 |---|---|---|---|
 | E1 skills | + changelog-format skill | Inconclusive | +0.20 [−0.01, +0.44] |
 | E2 tools | + file toolset | Inconclusive (tool errors 28 → 14) | −0.02 [−0.04, 0.00] |
 | E3 memory | seeded user preferences | Inconclusive; **Better** after a disclosed grader fix | +0.15 [−0.06, +0.39]; corrected +0.19 [+0.01, +0.41] |
+| **E4 skills (showcase)** | + customer-data-cleanup skill | **Better**: pass rate 33% → 100% | **+0.44 [+0.22, +0.65]** |
 
-The skill and the memory take their target tasks from 0.0–0.45 to 1.00 in every repeat,
-held-out tasks included. The suite-wide CI stays close to zero because each factor affects only
-3 of the 12 tasks. [Results](docs/results.md) explains this and the grader bug found in E3.
+In E1 and E3 the skill and the memory take their target tasks from 0.0–0.45 to 1.00 in every
+repeat, held-out tasks included, but the 12-task CI stays close to zero because each factor
+affects only 3 tasks. E4 is built around its skill (6 cleanup tasks + 2 controls): B passes all
+24 trials, is cheaper per trial, and the CI is well above zero.
+[Results](docs/results.md) covers all four, including the grader bugs that were found and fixed.
+
+**Demo path:** open *E4 · customer data cleanup skill* → the verdict → a `cleanup-duplicates`
+arm A run (failed checks with reasons, transcript, diff) → *A vs B on this task*. Then
+**New skill config** → *Use an existing skill* → `customer-data-cleanup` to show how such a
+config is made.
 
 ## Run a real experiment
 
@@ -56,7 +64,21 @@ held-out tasks included. The suite-wide CI stays close to zero because each fact
 72 trials with Sonnet 5 cost about $2.5 and take about 20 minutes at concurrency 4. The
 experiment stops if agent spend reaches its cost cap. See [costs](docs/costs.md).
 
-## Add your own
+## Test your own skill (in the UI)
+
+1. Click **New skill config**. Pick a base config (e.g. `base`), then either **write a new
+   skill** (name, when to use it, Markdown instructions; a template is provided) or **use an
+   existing skill** (with a preview of its `SKILL.md`).
+2. **Create config.** The new config is the base plus that skill and nothing else, so it is a
+   valid *skills* candidate against the base.
+3. **Start an experiment** opens the New experiment form with factor, baseline and candidate
+   filled in. Pick tasks the skill is for, plus a couple of unrelated ones as controls, and run.
+
+Skills written in the UI are stored in `data/skills/<name>/SKILL.md`, next to the trial data and
+outside Git. To keep one, copy it to `skills/<name>/` and commit it. A skill only shows an effect
+on tasks that need it, so add 3 or more such tasks (see below).
+
+## Add your own (in Git)
 
 **A task:** `tasks/<slug>/`
 
