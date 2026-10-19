@@ -1,0 +1,22 @@
+2026-10-01T09:00:01Z INFO  [api] server started on :8080
+2026-10-01T09:00:04Z DEBUG [db] pool size 10
+2026-10-01T09:01:12Z ERROR [db] connection reset by peer
+2026-10-01T09:01:13Z WARN  [db] retrying after error (attempt 1)
+2026-10-01T09:01:15Z ERROR [db] connection reset by peer
+2026-10-01T09:02:40Z INFO  [auth] login ok user=4411
+2026-10-01T09:03:02Z ERROR [auth] token signature invalid
+2026-10-01T09:03:02Z     at verify (auth/jwt.js:88)
+2026-10-01T09:03:02Z     at ERROR_HANDLER (auth/middleware.js:12)
+2026-10-01T09:04:10Z INFO  [payments] charge ok id=ch_101
+2026-10-01T09:05:55Z ERROR [payments] card declined id=ch_102
+2026-10-01T09:06:00Z DEBUG [api] request log: status=ERROR? no, status=200
+2026-10-01T09:07:30Z ERROR [db] deadlock detected on table invoices
+2026-10-01T09:08:01Z WARN  [auth] 3 failed logins for user=17
+2026-10-01T09:09:44Z ERROR [auth] token expired
+2026-10-01T09:10:02Z INFO  [payments] charge ok id=ch_103
+2026-10-01T09:11:19Z ERROR [payments] provider timeout id=ch_104
+2026-10-01T09:12:00Z ERROR [db] connection reset by peer
+2026-10-01T09:13:37Z INFO  [api] health ok
+2026-10-01T09:14:58Z ERROR [search] index shard 3 unavailable
+2026-10-01T09:15:00Z WARN  [search] serving stale results
+2026-10-01T09:16:21Z ERROR [auth] token signature invalid

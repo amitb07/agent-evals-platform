@@ -1,0 +1,41 @@
+id: skill-changelog-prs
+title: Changelog entry from pull requests (held out)
+category: skill
+prompt: |
+  prs.json lists the pull requests merged for release 4.1.0 with their titles, labels and authors.
+  Create CHANGELOG.md with the entry for release 4.1.0, dated 2026-10-18, following our house
+  changelog format.
+fixtures: [prs.json]
+timeoutSec: 300
+graders:
+  - { type: file_exists, id: changelog-exists, path: CHANGELOG.md, weight: 0.05, gate: true }
+  - {
+      type: command,
+      id: entries,
+      run: python3 /tests/checks/check_changelog.py entries,
+      weight: 0.3,
+    }
+  - {
+      type: command,
+      id: sections,
+      run: python3 /tests/checks/check_changelog.py sections,
+      weight: 0.2,
+    }
+  - {
+      type: command,
+      id: bullets,
+      run: python3 /tests/checks/check_changelog.py bullets,
+      weight: 0.15,
+    }
+  - type: regex
+    id: heading
+    path: CHANGELOG.md
+    pattern: '^## 4\.1\.0 — 2026-10-18$'
+    flags: m
+    weight: 0.15
+  - type: regex
+    id: thanks
+    path: CHANGELOG.md
+    pattern: '^Thanks to @ana, @dana, @kim, @li, @omar, @sam\.$'
+    flags: m
+    weight: 0.15

@@ -1,0 +1,2 @@
+- Name: Priya Nair, finance operations lead in the Berlin office.
+- Prefers short, plain answers.

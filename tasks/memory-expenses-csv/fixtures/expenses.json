@@ -1,0 +1,7 @@
+[
+  { "date": "2026-03-05", "vendor": "Deutsche Bahn", "category": "travel", "amount": 189.9 },
+  { "date": "2026-03-09", "vendor": "Hotel Adlon", "category": "lodging", "amount": 1240.0 },
+  { "date": "2026-03-12", "vendor": "Lufthansa", "category": "travel", "amount": 612.35 },
+  { "date": "2026-03-18", "vendor": "Café Einstein", "category": "meals", "amount": 46.8 },
+  { "date": "2026-03-27", "vendor": "Staples", "category": "office", "amount": 23.99 }
+]

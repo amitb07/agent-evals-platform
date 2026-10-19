@@ -1,0 +1,25 @@
+id: tools-region-report
+title: Revenue per region report
+category: tools
+prompt: |
+  data/sales.csv has one row per sale. Write report.md in the current directory with a markdown
+  table that has the columns Region and Revenue: one row per region with its total revenue,
+  sorted from the highest to the lowest total.
+fixtures: [data/sales.csv]
+timeoutSec: 300
+graders:
+  - { type: file_exists, id: report-exists, path: report.md, weight: 0.1, gate: true }
+  - type: command
+    id: totals
+    run: python3 /tests/checks/check_report.py rows
+    weight: 0.5
+  - type: command
+    id: sorted
+    run: python3 /tests/checks/check_report.py sorted
+    weight: 0.25
+  - type: regex
+    id: header
+    path: report.md
+    pattern: '^\|\s*Region\s*\|\s*Revenue\s*\|'
+    flags: im
+    weight: 0.15

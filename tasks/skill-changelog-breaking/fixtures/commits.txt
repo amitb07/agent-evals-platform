@@ -1,0 +1,11 @@
+b01e7a2 feat(api)!: remove the deprecated /v1 endpoints (#501) @omar
+b02c4d1 feat(webhooks): sign payloads with HMAC-SHA256 (#503) @ana
+b03a9f0 fix(export): escape quotes in CSV cells (#504) @li
+b04d2c8 ci: cache the pnpm store between jobs (#505) @li
+b05f6e3 feat(api): add a batch invoice endpoint (#507) @dana
+b06b1a4 fix(auth): reject tokens issued in the future (#508) @sam
+b07c3d9 revert: "feat(api): add a batch invoice endpoint" (#509) @dana
+b08e5f1 perf(reports): stream large exports (#510) @ana
+b09a7b2 fix(billing): round VAT per line, not per invoice (#511) @omar
+        BREAKING CHANGE: invoice totals can differ by one cent from 3.x
+b10d8c6 docs(api): document the v2 pagination (#512) @kim

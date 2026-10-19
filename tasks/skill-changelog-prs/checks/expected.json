@@ -1,0 +1,21 @@
+{
+  "version": "4.1.0",
+  "sections": [
+    ["Breaking", ["- **api**: Rename the `amount` field to `amount_cents` in the API (#605)"]],
+    [
+      "Added",
+      [
+        "- **general**: Add dark mode (#607)",
+        "- **payments**: Add SEPA direct debit as a payment method (#601)"
+      ]
+    ],
+    [
+      "Fixed",
+      [
+        "- **customers**: Fix crash when a customer has no email (#602)",
+        "- **invoices**: Fix wrong currency symbol in PDF invoices (#606)"
+      ]
+    ],
+    ["Performance", ["- **invoices**: Speed up the invoice list by 3x (#604)"]]
+  ]
+}

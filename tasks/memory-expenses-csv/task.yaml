@@ -1,0 +1,35 @@
+id: memory-expenses-csv
+title: Expenses to a CSV for Excel
+category: memory
+prompt: |
+  Turn expenses.json into a CSV file I can open in Excel, with the columns date, vendor,
+  category and amount. Name it expenses.csv and put it where my reports go.
+fixtures: [expenses.json]
+timeoutSec: 300
+graders:
+  - {
+      type: command,
+      id: found,
+      run: python3 /tests/checks/check_memory.py found expenses.csv,
+      weight: 0.1,
+      gate: true,
+    }
+  - {
+      type: command,
+      id: rows,
+      run: python3 /tests/checks/check_memory.py expense-rows expenses.csv,
+      weight: 0.3,
+    }
+  - { type: file_exists, id: in-reports, path: reports/expenses.csv, weight: 0.2 }
+  - {
+      type: command,
+      id: semicolon,
+      run: python3 /tests/checks/check_memory.py semicolon expenses.csv,
+      weight: 0.2,
+    }
+  - {
+      type: command,
+      id: dates,
+      run: python3 /tests/checks/check_memory.py expense-dates expenses.csv,
+      weight: 0.2,
+    }

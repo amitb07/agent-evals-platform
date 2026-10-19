@@ -1,0 +1,42 @@
+id: memory-invoice-summary
+title: Summary of open invoices
+category: memory
+prompt: |
+  From invoices.csv, write a short markdown summary of the open invoices: how many there are,
+  the total amount outstanding and the oldest due date. Save it as open-invoices.md with my
+  other reports.
+fixtures: [invoices.csv]
+timeoutSec: 300
+graders:
+  - {
+      type: command,
+      id: found,
+      run: python3 /tests/checks/check_memory.py found open-invoices.md,
+      weight: 0.1,
+      gate: true,
+    }
+  - {
+      type: command,
+      id: count,
+      run: python3 /tests/checks/check_memory.py open-count open-invoices.md,
+      weight: 0.15,
+    }
+  - {
+      type: command,
+      id: total,
+      run: python3 /tests/checks/check_memory.py open-total open-invoices.md,
+      weight: 0.2,
+    }
+  - {
+      type: command,
+      id: total-format,
+      run: "python3 /tests/checks/check_memory.py 'regex:11\\.735,67 €' open-invoices.md",
+      weight: 0.2,
+    }
+  - {
+      type: command,
+      id: date-format,
+      run: "python3 /tests/checks/check_memory.py 'regex:15\\.09\\.2026' open-invoices.md",
+      weight: 0.15,
+    }
+  - { type: file_exists, id: in-reports, path: reports/open-invoices.md, weight: 0.2 }

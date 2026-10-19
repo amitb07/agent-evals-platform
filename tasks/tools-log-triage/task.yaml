@@ -1,0 +1,21 @@
+id: tools-log-triage
+title: Count errors per component in a log
+category: tools
+prompt: |
+  logs/app.log is an application log. Each entry line has a timestamp, a level and a component
+  in square brackets. Write errors.json in the current directory: a JSON object mapping each
+  component to the number of ERROR-level entries it logged. Only count entries whose level is
+  ERROR; include only components that have at least one.
+fixtures: [logs/app.log]
+timeoutSec: 300
+graders:
+  - { type: file_exists, id: errors-exists, path: errors.json, weight: 0.1, gate: true }
+  - type: json
+    id: counts
+    path: errors.json
+    expect: { db: 4, auth: 3, payments: 2, search: 1 }
+    weight: 0.7
+  - type: command
+    id: no-extra-keys
+    run: python3 /tests/checks/no_extra_keys.py
+    weight: 0.2

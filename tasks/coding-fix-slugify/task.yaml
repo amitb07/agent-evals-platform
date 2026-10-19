@@ -1,0 +1,22 @@
+id: coding-fix-slugify
+title: Fix a slugify function
+category: coding
+prompt: |
+  textutil/slugify.py does not do what its docstring promises: separators are not collapsed or
+  trimmed and accented letters are not turned into plain ASCII. Fix slugify so it matches the
+  docstring for any input (letters with accents become their ASCII base letter, any other run of
+  non-alphanumeric characters becomes a single hyphen, no leading or trailing hyphens). Keep the
+  function name and signature. tests/test_slugify.py has a few tests; use only the Python
+  standard library.
+fixtures: [textutil/__init__.py, textutil/slugify.py, tests/test_slugify.py]
+timeoutSec: 400
+graders:
+  - type: command
+    id: hidden-tests
+    run: python3 -m pytest -q -p no:cacheprovider /tests/checks/test_slugify_hidden.py
+    weight: 0.8
+    gate: true
+  - type: command
+    id: visible-tests
+    run: python3 -m pytest -q -p no:cacheprovider tests/test_slugify.py
+    weight: 0.2

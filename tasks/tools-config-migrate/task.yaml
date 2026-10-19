@@ -1,0 +1,24 @@
+id: tools-config-migrate
+title: Migrate a JSON config file
+category: tools
+prompt: |
+  Update config/app.json for the TLS rollout: set server.port to 8443, turn TLS on by setting
+  server.tls.enabled to true and adding server.tls.certPath with the value /etc/certs/app.pem,
+  and remove the deprecated top-level legacyMode key. Leave every other setting unchanged and
+  keep the file valid JSON.
+fixtures: [config/app.json]
+timeoutSec: 300
+graders:
+  - type: command
+    id: valid-json
+    run: python3 -c "import json; json.load(open('config/app.json'))"
+    weight: 0.1
+    gate: true
+  - type: command
+    id: changes
+    run: python3 /tests/checks/check_config.py changes
+    weight: 0.5
+  - type: command
+    id: preserved
+    run: python3 /tests/checks/check_config.py preserved
+    weight: 0.4

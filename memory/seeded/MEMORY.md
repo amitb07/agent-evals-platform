@@ -1,0 +1,5 @@
+- Every report I write for Priya goes in the `reports/` folder of the current directory (create it if missing), never in the directory root.
+- CSV files for Priya use a semicolon (;) as the delimiter, because her Excel runs with German locale settings. Always include a header row.
+- Money for Priya is written the German way with the euro sign after the amount: 1.234,50 € (dot for thousands, comma for decimals, always two decimals, a space before €).
+- Dates for Priya are written DD.MM.YYYY, for example 05.03.2026, in every file and message.
+- Emails Priya asks me to draft start with "Hallo <first name>," and end with the two lines "Viele Grüße" and "Priya". The body is in English unless she says otherwise.

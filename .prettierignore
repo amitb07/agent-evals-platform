@@ -7,3 +7,7 @@ reports/
 *.md
 *.html
 **/generated/
+
+# Task fixtures are agent inputs and must stay byte-exact.
+tasks/*/fixtures/
+e2e/repo/tasks/*/fixtures/

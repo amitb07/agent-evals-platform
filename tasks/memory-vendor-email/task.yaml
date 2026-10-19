@@ -1,0 +1,47 @@
+id: memory-vendor-email
+title: Overdue invoice email (held out)
+category: memory
+prompt: |
+  Draft an email to Marco at Nordwind Logistics reminding him that their invoice is overdue.
+  Take the invoice number, amount and due date from invoices.csv. Save the draft as
+  email-draft.txt.
+fixtures: [invoices.csv]
+timeoutSec: 300
+graders:
+  - {
+      type: command,
+      id: found,
+      run: python3 /tests/checks/check_memory.py found email-draft.txt,
+      weight: 0.1,
+      gate: true,
+    }
+  - {
+      type: command,
+      id: invoice,
+      run: "python3 /tests/checks/check_memory.py 'regex:NW-2291' email-draft.txt",
+      weight: 0.15,
+    }
+  - {
+      type: command,
+      id: greeting,
+      run: python3 /tests/checks/check_memory.py greeting email-draft.txt,
+      weight: 0.25,
+    }
+  - {
+      type: command,
+      id: signoff,
+      run: python3 /tests/checks/check_memory.py signoff email-draft.txt,
+      weight: 0.25,
+    }
+  - {
+      type: command,
+      id: amount-format,
+      run: "python3 /tests/checks/check_memory.py 'regex:4\\.180,00 €' email-draft.txt",
+      weight: 0.15,
+    }
+  - {
+      type: command,
+      id: date-format,
+      run: "python3 /tests/checks/check_memory.py 'regex:15\\.09\\.2026' email-draft.txt",
+      weight: 0.1,
+    }

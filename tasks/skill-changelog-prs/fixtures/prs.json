@@ -1,0 +1,64 @@
+[
+  {
+    "number": 601,
+    "title": "Add SEPA direct debit as a payment method",
+    "labels": [
+      "feature",
+      "area: payments"
+    ],
+    "author": "ana"
+  },
+  {
+    "number": 602,
+    "title": "Fix crash when a customer has no email",
+    "labels": [
+      "bug",
+      "area: customers"
+    ],
+    "author": "omar"
+  },
+  {
+    "number": 603,
+    "title": "Upgrade CI runners to Ubuntu 24.04",
+    "labels": [
+      "internal"
+    ],
+    "author": "li"
+  },
+  {
+    "number": 604,
+    "title": "Speed up the invoice list by 3x",
+    "labels": [
+      "performance",
+      "area: invoices"
+    ],
+    "author": "sam"
+  },
+  {
+    "number": 605,
+    "title": "Rename the `amount` field to `amount_cents` in the API",
+    "labels": [
+      "breaking",
+      "feature",
+      "area: api"
+    ],
+    "author": "dana"
+  },
+  {
+    "number": 606,
+    "title": "Fix wrong currency symbol in PDF invoices",
+    "labels": [
+      "bug",
+      "area: invoices"
+    ],
+    "author": "kim"
+  },
+  {
+    "number": 607,
+    "title": "Add dark mode",
+    "labels": [
+      "feature"
+    ],
+    "author": "li"
+  }
+]

@@ -1,0 +1,41 @@
+id: skill-changelog-release
+title: Changelog entry from commits
+category: skill
+prompt: |
+  commits.txt lists the commits merged for release 3.2.0, one per line: hash, conventional
+  commit subject with the pull request number, and the author handle. Create CHANGELOG.md with the
+  entry for release 3.2.0, dated 2026-10-15, following our house changelog format.
+fixtures: [commits.txt]
+timeoutSec: 300
+graders:
+  - { type: file_exists, id: changelog-exists, path: CHANGELOG.md, weight: 0.05, gate: true }
+  - {
+      type: command,
+      id: entries,
+      run: python3 /tests/checks/check_changelog.py entries,
+      weight: 0.3,
+    }
+  - {
+      type: command,
+      id: sections,
+      run: python3 /tests/checks/check_changelog.py sections,
+      weight: 0.2,
+    }
+  - {
+      type: command,
+      id: bullets,
+      run: python3 /tests/checks/check_changelog.py bullets,
+      weight: 0.15,
+    }
+  - type: regex
+    id: heading
+    path: CHANGELOG.md
+    pattern: '^## 3\.2\.0 — 2026-10-15$'
+    flags: m
+    weight: 0.15
+  - type: regex
+    id: thanks
+    path: CHANGELOG.md
+    pattern: '^Thanks to @ana, @dana, @li, @omar, @sam\.$'
+    flags: m
+    weight: 0.15

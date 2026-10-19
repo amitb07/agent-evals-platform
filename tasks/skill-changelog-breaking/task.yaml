@@ -1,0 +1,48 @@
+id: skill-changelog-breaking
+title: Changelog entry with breaking changes and a revert
+category: skill
+prompt: |
+  commits.txt lists the commits merged for release 4.0.0 (hash, conventional commit subject with
+  the pull request number, author handle; a commit may have an indented note on the next line).
+  Add the entry for release 4.0.0, dated 2026-10-17, to CHANGELOG.md following our house changelog
+  format.
+fixtures: [CHANGELOG.md, commits.txt]
+timeoutSec: 300
+graders:
+  - { type: file_exists, id: changelog-exists, path: CHANGELOG.md, weight: 0.05, gate: true }
+  - {
+      type: command,
+      id: entries,
+      run: python3 /tests/checks/check_changelog.py entries,
+      weight: 0.25,
+    }
+  - {
+      type: command,
+      id: sections,
+      run: python3 /tests/checks/check_changelog.py sections,
+      weight: 0.2,
+    }
+  - {
+      type: command,
+      id: bullets,
+      run: python3 /tests/checks/check_changelog.py bullets,
+      weight: 0.15,
+    }
+  - type: regex
+    id: heading
+    path: CHANGELOG.md
+    pattern: '^## 4\.0\.0 — 2026-10-17$'
+    flags: m
+    weight: 0.1
+  - type: regex
+    id: thanks
+    path: CHANGELOG.md
+    pattern: '^Thanks to @ana, @li, @omar, @sam\.$'
+    flags: m
+    weight: 0.1
+  - {
+      type: command,
+      id: preserved,
+      run: python3 /tests/checks/check_changelog.py preserved,
+      weight: 0.15,
+    }

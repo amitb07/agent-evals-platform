@@ -1,0 +1,13 @@
+{
+  "name": "ledgerline",
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "tls": { "enabled": false },
+    "timeouts": { "readMs": 5000, "writeMs": 5000 }
+  },
+  "database": { "url": "postgres://ledger@db:5432/ledger", "poolSize": 10 },
+  "legacyMode": true,
+  "features": { "csvExport": true, "darkMode": false },
+  "logLevel": "info"
+}

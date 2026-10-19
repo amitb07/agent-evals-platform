@@ -1,0 +1,10 @@
+9f1c2a1 feat(search): add fuzzy matching for customer names (#412) @dana
+4b7e0d3 docs: update the README badges (#413) @li
+c2d9e11 fix(auth): refresh expired sessions instead of logging out (#415) @omar
+77ab310 chore(deps): bump express to 5.1.2 (#416) @renovate
+e0f4b92 feat(export): add CSV export to the reports page (#418) @li
+1a2b3c4 perf(search): cache the tokenizer between queries (#419) @dana
+5d6e7f8 test(auth): cover the session refresh path (#420) @omar
+8899aab fix(reports): show totals for empty months (#421) @sam
+0c0d0e0 refactor(api): split the router module (#422) @li
+3e3f3a3 fix: correct the copyright year in the footer (#423) @ana

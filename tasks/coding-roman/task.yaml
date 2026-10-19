@@ -1,0 +1,22 @@
+id: coding-roman
+title: Implement Roman numeral conversion
+category: coding
+prompt: |
+  Implement to_roman and from_roman in roman.py as described in their docstrings. Keep the
+  function names and signatures and use only the Python standard library. test_roman.py has two
+  example tests.
+fixtures: [roman.py, test_roman.py]
+timeoutSec: 400
+graders:
+  - type: command
+    id: to-roman
+    run: python3 -m pytest -q -p no:cacheprovider /tests/checks/test_to_roman.py
+    weight: 0.4
+  - type: command
+    id: from-roman
+    run: python3 -m pytest -q -p no:cacheprovider /tests/checks/test_from_roman.py
+    weight: 0.4
+  - type: command
+    id: visible-tests
+    run: python3 -m pytest -q -p no:cacheprovider test_roman.py
+    weight: 0.2

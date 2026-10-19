@@ -1,0 +1,22 @@
+{
+  "version": "4.0.0",
+  "sections": [
+    [
+      "Breaking",
+      [
+        "- **api**: Remove the deprecated /v1 endpoints (#501)",
+        "- **billing**: Round VAT per line, not per invoice (#511)"
+      ]
+    ],
+    ["Added", ["- **webhooks**: Sign payloads with HMAC-SHA256 (#503)"]],
+    [
+      "Fixed",
+      [
+        "- **auth**: Reject tokens issued in the future (#508)",
+        "- **export**: Escape quotes in CSV cells (#504)"
+      ]
+    ],
+    ["Performance", ["- **reports**: Stream large exports (#510)"]]
+  ],
+  "preservedOlder": "## 3.2.0 — 2026-10-15\n\n### Added\n\n- **export**: Add CSV export to the reports page (#418)\n- **search**: Add fuzzy matching for customer names (#412)\n\n### Fixed\n\n- **auth**: Refresh expired sessions instead of logging out (#415)\n- **general**: Correct the copyright year in the footer (#423)\n- **reports**: Show totals for empty months (#421)\n\n### Performance\n\n- **search**: Cache the tokenizer between queries (#419)\n\nThanks to @ana, @dana, @li, @omar, @sam.\n"
+}

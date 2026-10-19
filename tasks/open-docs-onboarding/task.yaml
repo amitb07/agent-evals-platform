@@ -1,0 +1,31 @@
+id: open-docs-onboarding
+title: Onboarding summary from service docs
+category: open
+prompt: |
+  The docs/ folder describes the Ledgerline service. Write ONBOARDING.md: a one-page summary for
+  an engineer joining the team, covering what the service does, how it is deployed and what to
+  do when paged. Keep it under 300 words and stick to what the docs say.
+fixtures: [docs/architecture.md, docs/deploy.md, docs/oncall.md]
+timeoutSec: 300
+graders:
+  - { type: file_exists, id: onboarding-exists, path: ONBOARDING.md, weight: 0.1, gate: true }
+  - type: command
+    id: under-300-words
+    run: test "$(wc -w < ONBOARDING.md)" -lt 300
+    weight: 0.15
+  - type: llm_judge
+    id: accurate-summary
+    rubric: |
+      ONBOARDING.md summarises three internal docs for a new engineer. Check these seven facts:
+      (1) Ledgerline is the invoicing service (creates, renders and emails invoices);
+      (2) merges to main deploy to staging automatically;
+      (3) production deploys are manual via the promote workflow, only on Tuesdays and Thursdays;
+      (4) rollback is `ledgerctl rollback <release-tag>`;
+      (5) for invoice-queue-lag, scale the worker with `ledgerctl scale worker=6`;
+      (6) pdf-render errors go to the Docs team in #docs-oncall;
+      (7) never restart the database without the DBA.
+      Score = (number of facts stated correctly) / 7. Subtract 0.2 for each statement that
+      contradicts the docs or invents a procedure they do not contain. Clamp to 0..1. Passed when
+      the score is at least 0.8.
+    files: [ONBOARDING.md]
+    weight: 0.75

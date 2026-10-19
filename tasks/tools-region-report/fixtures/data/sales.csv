@@ -1,0 +1,13 @@
+region,product,revenue
+north,widget,1200.00
+south,gadget,850.50
+east,widget,430.25
+west,gizmo,990.00
+north,gizmo,310.75
+east,gadget,1275.00
+south,widget,220.00
+west,widget,415.40
+north,gadget,640.00
+east,gizmo,85.10
+south,gizmo,1010.00
+west,gadget,300.00
