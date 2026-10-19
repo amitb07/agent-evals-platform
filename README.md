@@ -11,7 +11,7 @@ files the agent changed, and the reason from every grader.
 Built with NestJS (API and worker), Vue 3 + TypeScript, Postgres and Docker.
 [Harbor](https://github.com/harbor-framework/harbor) runs the trials.
 
-![Compare screen](docs/screenshots/e1-compare.png)
+![Compare screen for E4: with the customer-data-cleanup skill, B is Better](docs/screenshots/e4-compare.png)
 
 ## Deliverables
 
