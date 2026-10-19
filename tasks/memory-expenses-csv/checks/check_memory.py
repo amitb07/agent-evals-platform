@@ -85,7 +85,7 @@ def main(check, name):
                 pass
         fail_unless(any(abs(v - 11735.67) < 0.005 for v in found), "total outstanding 11735.67 is present", "the total outstanding 11735.67 is missing")
     elif check == "greeting":
-        body = [l for l in lines(path) if not re.match(r"(subject|betreff)\s*:", l, re.I)]
+        body = [l for l in lines(path) if not re.match(r"(to|from|cc|subject|betreff)\s*:", l, re.I)]
         fail_unless(body and body[0].startswith("Hallo Marco,"), "starts with 'Hallo Marco,'", f"first line is {body[:1]}")
     elif check == "signoff":
         fail_unless(lines(path)[-2:] == ["Viele Grüße", "Priya"], "ends with 'Viele Grüße' / 'Priya'", f"ends with {lines(path)[-2:]}")

@@ -49,6 +49,20 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  # Build-only services: they tag the agent and verifier images Harbor runs per trial, then exit.
+  # `docker compose up` therefore builds everything a real run needs.
+  hermes-image:
+    build: { context: docker/hermes }
+    image: evals/hermes-runner:latest
+    entrypoint: ['true']
+    restart: 'no'
+
+  verifier-image:
+    build: { <<: *app-build, target: verifier }
+    image: evals/verifier:latest
+    entrypoint: ['true']
+    restart: 'no'
+
   worker:
     build: { <<: *app-build, target: worker }
     env_file:
@@ -64,6 +78,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       migrate:
+        condition: service_completed_successfully
+      hermes-image:
+        condition: service_completed_successfully
+      verifier-image:
         condition: service_completed_successfully
 
   web:
