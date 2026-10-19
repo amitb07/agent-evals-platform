@@ -1,0 +1,6 @@
+a1f3c2e Add CSV export to the reports page
+9b0d4a1 Refactor report query builder into its own module
+77e1c90 Fix dark mode colours in the settings dialog
+c3d5e2f CI: cache pnpm store between jobs
+5e8f019 Speed up search by indexing titles (about 3x faster)
+0d2b6aa Add unit tests for the date parser

@@ -1,0 +1,31 @@
+# Smoke task for the real-Hermes check (step 18); exercises the LLM judge. Not part of E1–E3.
+id: smoke-release-note
+title: Release note from a change log (smoke)
+category: open
+prompt: |
+  CHANGES.txt lists the commits in this release, one per line.
+  Write RELEASE.md: a short release note for end users with a "# Release 2.4" heading and at
+  most five bullet points covering only user-facing changes (skip refactors, CI and test-only
+  commits).
+fixtures: [CHANGES.txt]
+timeoutSec: 300
+tags: [smoke]
+graders:
+  - { type: file_exists, id: release-exists, path: RELEASE.md, weight: 0.2, gate: true }
+  - {
+      type: regex,
+      id: heading,
+      path: RELEASE.md,
+      pattern: '^# Release 2\.4',
+      flags: m,
+      weight: 0.2,
+    }
+  - type: llm_judge
+    id: user-facing
+    rubric: |
+      RELEASE.md is a release note for end users of version 2.4. It passes when it has at most
+      five bullets, mentions the CSV export, the dark-mode fix and the faster search, and does
+      not mention the refactor, the CI change or the test-only change. Score 1 when all of that
+      holds, 0.5 when one item is missing or one internal change is mentioned, else 0.
+    files: [RELEASE.md]
+    weight: 0.6

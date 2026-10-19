@@ -1,0 +1,19 @@
+# Smoke task for the real-Hermes check (step 18); not part of E1–E3.
+id: smoke-csv-total
+title: Total revenue per region (smoke)
+category: tools
+prompt: |
+  data/sales.csv has one row per sale with columns region and revenue.
+  Write totals.json in the current directory: a JSON object mapping each region to its total
+  revenue as a number, for example {"east": 10.5}.
+fixtures: [data/sales.csv]
+timeoutSec: 300
+tags: [smoke]
+graders:
+  - type: json
+    id: totals
+    path: totals.json
+    expect: { north: 1250.5, south: 980, west: 300.25 }
+    weight: 0.8
+    gate: true
+  - { type: file_exists, id: totals-exists, path: totals.json, weight: 0.2 }
