@@ -1,8 +1,8 @@
 .env
 node_modules/
 dist/
-data/
-jobs/
+/data/
+/jobs/
 .harbor/
 __pycache__/
 *.pyc
