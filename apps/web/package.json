@@ -9,10 +9,20 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "vue": "^3.5.44"
+    "@evals/shared": "workspace:*",
+    "@headlessui/vue": "^1.7.23",
+    "echarts": "^6.1.0",
+    "vue": "^3.5.44",
+    "vue-echarts": "^8.3.2",
+    "vue-router": "^5.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/test-utils": "^2.5.1",
+    "happy-dom": "^21.0.3",
+    "tailwindcss": "^4.3.3",
     "vite": "^8.3.4",
     "vitest": "^4.1.12",
     "vue-tsc": "^3.3.13"
