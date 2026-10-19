@@ -1,6 +1,6 @@
 import type { TrialDetail } from '@evals/shared';
 import { describe, expect, it } from 'vitest';
-import { outcome } from './outcome';
+import { checkReason, outcome } from './outcome';
 
 const grade = (graderId: string, passed: boolean, gate = false, score = passed ? 1 : 0) => ({
   graderId,
@@ -84,5 +84,19 @@ describe('outcome', () => {
     );
     expect(o).toMatchObject({ tone: 'excluded', title: 'Excluded: sandbox failed' });
     expect(o.detail).toContain('Docker died.');
+  });
+
+  it('uses the checker message for command checks', () => {
+    const g = {
+      ...grade('bullets', false),
+      type: 'command' as const,
+      reason: 'exit 1',
+      evidence: ['stdout: progress\n', 'stderr: Traceback\nbullets differ from the house format\n'],
+    };
+    expect(checkReason(g)).toBe('bullets differ from the house format (exit 1)');
+    expect(outcome(trial({ passed: false, score: 0.3, grades: [g] })).detail).toBe(
+      'bullets: bullets differ from the house format (exit 1)',
+    );
+    expect(checkReason({ ...g, evidence: [] })).toBe('exit 1');
   });
 });

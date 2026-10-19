@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { GradeCheck } from '@evals/shared';
 import { num } from '../format';
+import { checkReason } from '../outcome';
 
 defineProps<{ grades: GradeCheck[] }>();
 </script>
@@ -28,7 +29,7 @@ defineProps<{ grades: GradeCheck[] }>();
             {{ g.passed ? 'pass' : 'fail' }}
           </span>
         </div>
-        <p class="mt-1 pl-3.5 text-stone-700">{{ g.reason }}</p>
+        <p class="mt-1 pl-3.5 text-stone-700">{{ checkReason(g) }}</p>
         <details v-if="g.evidence.length" class="mt-1 pl-3.5">
           <summary class="cursor-pointer text-xs text-stone-500 hover:text-stone-800">
             Evidence ({{ g.evidence.length }})
