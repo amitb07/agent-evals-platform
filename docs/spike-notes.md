@@ -1,5 +1,9 @@
 # Day-1 spike notes (2026-10-18)
 
+> The throwaway spike assets (`spike/`: hand-written Harbor task, job files and home bundles) were
+> removed in the cleanup once the worker generated all of them; they are in git history at commit
+> `e23872e` (`git show e23872e:spike/job.yaml`).
+
 ## Pinned versions
 
 | Component | Value |

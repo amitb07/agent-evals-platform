@@ -1,7 +1,6 @@
 pnpm-lock.yaml
 dist/
 data/
-spike/
 research_notes/
 reports/
 *.md

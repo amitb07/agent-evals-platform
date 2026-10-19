@@ -117,9 +117,6 @@ importers:
       vue-router:
         specifier: ^5.4.0
         version: 5.4.0(@vue/compiler-sfc@3.5.44)(rolldown@1.2.14)(vite@8.3.4(@types/node@20.19.43)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.44(typescript@6.0.3))(webpack@5.106.2)
-      zod:
-        specifier: ^4.6.7
-        version: 4.6.7
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3
