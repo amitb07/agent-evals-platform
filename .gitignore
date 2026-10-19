@@ -8,3 +8,4 @@ __pycache__/
 *.pyc
 .venv/
 packages/db/src/generated/
+.DS_Store
