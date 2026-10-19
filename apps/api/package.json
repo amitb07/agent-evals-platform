@@ -10,7 +10,8 @@
     "start": "node dist/main",
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=ExperimentalWarning' jest --passWithNoTests --runInBand",
     "sync": "node dist/sync.cli",
-    "rescore": "node dist/rescore.cli"
+    "rescore": "node dist/rescore.cli",
+    "seed:export": "node dist/seed.export.cli"
   },
   "jest": {
     "rootDir": "src",

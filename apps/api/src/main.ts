@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ApiExceptionFilter } from './common/api-exception.filter';
 import { env } from './env';
+import { SeedService } from './seed/seed.service';
 import { SyncService } from './sync/sync.service';
 
 async function bootstrap(): Promise<void> {
@@ -11,6 +12,7 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new ApiExceptionFilter());
   app.enableShutdownHooks();
   await app.get(SyncService).run();
+  await app.get(SeedService).loadIfEmpty();
   await app.listen(env.PORT);
 }
 

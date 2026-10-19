@@ -9,6 +9,8 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   /** Only checked for presence: an experiment cannot be queued without it. */
   ANTHROPIC_API_KEY: z.string().optional(),
+  /** Load `seed/demo.json.gz` into an empty database at startup. */
+  DEMO_SEED: z.stringbool().default(true),
 });
 export type ApiEnv = z.infer<typeof envSchema>;
 
