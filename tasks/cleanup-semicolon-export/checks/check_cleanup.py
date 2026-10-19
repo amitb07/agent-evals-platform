@@ -1,8 +1,9 @@
 """Checks clean/customers.csv and clean/report.json against the customer-data-cleanup standard.
 
 Usage: check_cleanup.py format|rows|emails|phones|countries|timestamps   (exit 0 = pass)
-Expected rows are in expected.csv next to this script. Field checks are lenient about the
-delimiter and header case, so content earns credit even when the format check fails.
+Expected rows are in expected.csv next to this script. Only `format` checks the exact header;
+the other checks accept either delimiter, any header case and the input column names the
+standard maps (customer_id, e-mail, last_updated, ...), so content earns credit on its own.
 """
 import csv
 import io
@@ -12,6 +13,17 @@ from pathlib import Path
 OUT = Path("clean/customers.csv")
 HEADER = "id,name,email,phone,country,updated_at"
 EXPECTED = list(csv.DictReader(io.StringIO((Path(__file__).parent / "expected.csv").read_text())))
+
+
+ALIASES = {
+    "id": ["id", "customer_id", "customer id"],
+    "name": ["name", "full_name", "full name"],
+    "email": ["email", "e-mail", "mail"],
+    "phone": ["phone", "telephone", "mobile"],
+    "country": ["country"],
+    "updated_at": ["updated_at", "last_updated", "last updated", "modified"],
+}
+STANDARD = {alias: col for col, names in ALIASES.items() for alias in names}
 
 
 def fail(message):
@@ -27,7 +39,8 @@ def output_rows():
     reader = csv.DictReader(io.StringIO(text), delimiter=delim)
     rows = []
     for row in reader:
-        rows.append({(k or "").strip().lower(): (v or "").strip() for k, v in row.items()})
+        named = {(k or "").strip().lower(): (v or "").strip() for k, v in row.items()}
+        rows.append({STANDARD.get(k, k): v for k, v in named.items()})
     return text, rows
 
 

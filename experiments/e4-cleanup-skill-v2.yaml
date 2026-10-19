@@ -1,6 +1,10 @@
 # Pre-registered before the run (plan §9, §12.9). Showcase experiment: the estimand is chosen so
 # the tasks the skill is for make up most of the suite (6 of 8), with 2 unrelated control tasks.
-id: e4-cleanup-skill
+# v1 (`e4-cleanup-skill`, commit 4230b94) was stopped after 12 of 48 trials: its content checks
+# only read the standard column names, so a baseline that kept `customer_id` scored 0 on correct
+# content. The checks now accept the standard's column aliases (only `format` needs the exact
+# header); the design is otherwise unchanged. v1 stays in the database as a stopped run.
+id: e4-cleanup-skill-v2
 name: E4 · customer data cleanup skill
 hypothesis: >-
   B (with the customer-data-cleanup skill) scores higher than A on the six cleanup tasks,
