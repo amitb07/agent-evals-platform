@@ -27,5 +27,14 @@ export default tseslint.config(
     files: ['apps/{api,worker}/**/*.ts', 'packages/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
+  {
+    // supertest types response bodies as `any`.
+    files: ['apps/api/**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
   prettier,
 );

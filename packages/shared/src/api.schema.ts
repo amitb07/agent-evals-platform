@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { armSchema, isoDateTimeSchema, slugSchema, unitIntervalSchema } from './common.schema';
-import { factorSchema } from './experiment.schema';
+import { experimentSchema, factorSchema } from './experiment.schema';
 import { gradeCheckSchema } from './grades.schema';
 import { failureCauseSchema } from './harbor.schema';
 import { taskCategorySchema } from './task.schema';
@@ -67,8 +67,13 @@ const armSummarySchema = z.object({
   costUsd: z.number(),
 });
 
+/** `POST /experiments` body: the experiment YAML shape. */
+export const createExperimentSchema = experimentSchema;
+export type CreateExperiment = z.input<typeof createExperimentSchema>;
+
 export const experimentDetailSchema = experimentSummarySchema.extend({
   hypothesis: z.string(),
+  stopRequested: z.boolean(),
   repeats: z.int(),
   concurrency: z.int(),
   passThreshold: unitIntervalSchema,
@@ -80,7 +85,9 @@ export const experimentDetailSchema = experimentSummarySchema.extend({
   finishedAt: isoDateTimeSchema.nullable(),
   tasks: z.array(
     z.object({
+      taskId: z.uuid(),
       taskSlug: slugSchema,
+      title: z.string(),
       category: taskCategorySchema,
       A: armSummarySchema,
       B: armSummarySchema,
@@ -97,6 +104,7 @@ export type TrialsQuery = z.infer<typeof trialsQuerySchema>;
 
 export const trialSummarySchema = z.object({
   id: z.uuid(),
+  taskId: z.uuid(),
   taskSlug: slugSchema,
   arm: armSchema,
   repeatIndex: z.int(),
@@ -114,6 +122,7 @@ export type TrialSummary = z.infer<typeof trialSummarySchema>;
 
 export const trialDetailSchema = trialSummarySchema.extend({
   experimentId: z.uuid(),
+  configSlug: slugSchema,
   turnExitReason: z.string().nullable(),
   exitCode: z.int().nullable(),
   tokensIn: z.int().nullable(),
@@ -129,6 +138,9 @@ export type TrialDetail = z.infer<typeof trialDetailSchema>;
 
 export const trialDiffSchema = z.object({ diff: z.string() });
 export type TrialDiff = z.infer<typeof trialDiffSchema>;
+
+export const trialFileSchema = z.object({ path: z.string(), size: z.int() });
+export type TrialFile = z.infer<typeof trialFileSchema>;
 
 /** `null` when no task has valid trials in both arms. */
 const confidenceIntervalSchema = z.object({
