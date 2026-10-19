@@ -11,6 +11,8 @@ files the agent changed, and the reason from every grader.
 Built with NestJS (API and worker), Vue 3 + TypeScript, Postgres and Docker.
 [Harbor](https://github.com/harbor-framework/harbor) runs the trials.
 
+▶ **[Watch the 3-minute demo video](docs/video/agent-evals-demo.mp4)**: the problem, the design and the system working end to end.
+
 ![Compare screen for E4: with the customer-data-cleanup skill, B is Better](docs/screenshots/e4-compare.png)
 
 ## Deliverables
@@ -22,7 +24,7 @@ Built with NestJS (API and worker), Vue 3 + TypeScript, Postgres and Docker.
 | 3 | Known limits | [docs/limits.md](docs/limits.md) |
 | 4 | Approximate costs | [docs/costs.md](docs/costs.md) |
 | 5 | Results of a real experiment | [docs/results.md](docs/results.md). Headline: **E4**, with vs. without the customer-data-cleanup skill: **Better**, +0.44 (95% CI +0.22 to +0.65) |
-| 6 | Video of the working system | _Link coming soon_ |
+| 6 | Video of the working system | [docs/video/agent-evals-demo.mp4](docs/video/agent-evals-demo.mp4) (3 min, narrated; script in [docs/video-script.md](docs/video-script.md)) |
 
 Planning material (the assignment brief, the solution plan, the implementation plan with its
 build log, and research notes) is in [planning/](planning/).
