@@ -45,6 +45,55 @@ export const configSummarySchema = z.object({
 });
 export type ConfigSummary = z.infer<typeof configSummarySchema>;
 
+/** Where a skill lives: `skills/` in the repo, or created in the UI (stored under DATA_DIR). */
+export const skillSourceSchema = z.enum(['repo', 'custom']);
+
+export const skillSummarySchema = z.object({
+  name: slugSchema,
+  description: z.string(),
+  source: skillSourceSchema,
+});
+export type SkillSummary = z.infer<typeof skillSummarySchema>;
+
+export const skillDetailSchema = skillSummarySchema.extend({
+  /** The full SKILL.md, front matter included. */
+  content: z.string(),
+});
+export type SkillDetail = z.infer<typeof skillDetailSchema>;
+
+/** Largest SKILL.md body the UI accepts; Hermes loads the whole file into the prompt. */
+export const MAX_SKILL_CHARS = 40_000;
+
+/** A skill written in the UI. The SKILL.md front matter is generated from name and description. */
+export const newSkillSchema = z.strictObject({
+  kind: z.literal('new'),
+  name: slugSchema.max(64),
+  description: z
+    .string()
+    .trim()
+    .min(1, 'Describe when Hermes should use the skill')
+    .max(300)
+    .refine((d) => !/[\r\n]/.test(d), 'Keep the description on one line'),
+  instructions: z
+    .string()
+    .trim()
+    .min(20, 'Write the instructions Hermes should follow (at least 20 characters)')
+    .max(MAX_SKILL_CHARS)
+    .refine((t) => !t.startsWith('---'), 'Leave out the front matter; it is generated'),
+});
+
+/** `POST /configs`: a copy of a base config with one more skill, existing or new. */
+export const createSkillConfigSchema = z.strictObject({
+  id: slugSchema.max(80),
+  name: z.string().trim().min(1).max(120),
+  baseConfigId: slugSchema,
+  skill: z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('existing'), name: slugSchema }),
+    newSkillSchema,
+  ]),
+});
+export type CreateSkillConfig = z.infer<typeof createSkillConfigSchema>;
+
 export const experimentSummarySchema = z.object({
   id: z.uuid(),
   slug: slugSchema,

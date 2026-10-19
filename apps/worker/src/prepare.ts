@@ -91,8 +91,13 @@ export async function prepareJob(
   const baseline = configFromRow(experiment.baselineConfig);
   const candidate = configFromRow(experiment.candidateConfig);
   const bundlesDir = join(env.DATA_DIR, 'bundles');
-  const homeA = await compileHome(baseline, { repoDir: env.REPO_DIR, outDir: bundlesDir });
-  const homeB = await compileHome(candidate, { repoDir: env.REPO_DIR, outDir: bundlesDir });
+  const homeOpts = {
+    repoDir: env.REPO_DIR,
+    outDir: bundlesDir,
+    customSkillsDir: join(env.DATA_DIR, 'skills'),
+  };
+  const homeA = await compileHome(baseline, homeOpts);
+  const homeB = await compileHome(candidate, homeOpts);
 
   const taskHashes: Record<string, string> = {};
   for (const { task: row } of experiment.tasks) {

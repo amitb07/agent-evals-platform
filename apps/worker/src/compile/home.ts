@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import type { AgentConfig } from '@evals/shared';
 import { stringify } from 'yaml';
-import { copy, hashDir, publishDir, writeTree } from './fs';
+import { copy, exists, hashDir, publishDir, writeTree } from './fs';
 
 export interface CompiledHome {
   dir: string;
@@ -35,13 +35,28 @@ export function hermesToolsets(config: AgentConfig): string[] {
   return config.memory.mode === 'seeded' ? [...config.toolsets, 'memory'] : [...config.toolsets];
 }
 
+/** The skill's SKILL.md: the repo's `skills/` first, then the custom skills directory. */
+async function skillFile(
+  skill: string,
+  opts: { repoDir: string; customSkillsDir?: string },
+): Promise<string> {
+  const repo = join(opts.repoDir, 'skills', skill, 'SKILL.md');
+  if ((await exists(repo)) || !opts.customSkillsDir) return repo;
+  return join(opts.customSkillsDir, skill, 'SKILL.md');
+}
+
 /**
  * Writes the Hermes home bundle for `config` to `<outDir>/<configSlug>-<hash12>/`. The directory is
  * content-addressed, so compiling an unchanged config reuses the existing bundle.
  */
 export async function compileHome(
   config: AgentConfig,
-  opts: { repoDir: string; outDir: string },
+  opts: {
+    repoDir: string;
+    outDir: string;
+    /** Skills created in the UI (`DATA_DIR/skills`); used when the repo has no skill of that name. */
+    customSkillsDir?: string;
+  },
 ): Promise<CompiledHome> {
   await mkdir(opts.outDir, { recursive: true });
   const tmp = await mkdtemp(join(opts.outDir, `.tmp-${config.id}-`));
@@ -52,10 +67,7 @@ export async function compileHome(
       '.no-bundled-skills': '',
     });
     for (const skill of config.skills) {
-      await copy(
-        join(opts.repoDir, 'skills', skill, 'SKILL.md'),
-        join(tmp, 'skills', skill, 'SKILL.md'),
-      );
+      await copy(await skillFile(skill, opts), join(tmp, 'skills', skill, 'SKILL.md'));
     }
     if (config.memory.mode === 'seeded') {
       const names = config.memory.files.map((file) => basename(file));

@@ -4,7 +4,7 @@ import { RouterLink, RouterView } from 'vue-router';
 
 <template>
   <header class="border-b border-stone-200 bg-white">
-    <nav class="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
+    <nav class="mx-auto flex max-w-6xl items-center gap-x-6 gap-y-2 px-4 py-3">
       <RouterLink to="/experiments" class="font-semibold tracking-tight">Agent Evals</RouterLink>
       <RouterLink
         to="/experiments"
@@ -14,8 +14,14 @@ import { RouterLink, RouterView } from 'vue-router';
         Experiments
       </RouterLink>
       <RouterLink
+        to="/configs/new"
+        class="ml-auto rounded-md px-3 py-1.5 text-sm font-medium text-stone-700 ring-1 ring-stone-300 hover:bg-stone-100"
+      >
+        New skill config
+      </RouterLink>
+      <RouterLink
         to="/experiments/new"
-        class="ml-auto rounded-md bg-stone-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-stone-700"
+        class="rounded-md bg-stone-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-stone-700"
       >
         New experiment
       </RouterLink>

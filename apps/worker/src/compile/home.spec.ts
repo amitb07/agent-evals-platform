@@ -1,5 +1,5 @@
-import { readdir } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
 import { parse } from 'yaml';
 import {
   BASE_CONFIG,
@@ -60,6 +60,20 @@ describe('compileHome', () => {
     const a = await compileHome(SKILL_CONFIG, { repoDir, outDir });
     const b = await compileHome(SKILL_CONFIG, { repoDir, outDir: await tempDir('bundles') });
     expect(b.hash).toBe(a.hash);
+  });
+
+  it('takes a skill created in the UI from the custom skills dir; the repo wins on a name clash', async () => {
+    const customSkillsDir = await tempDir('custom-skills');
+    await mkdir(join(customSkillsDir, 'my-skill'), { recursive: true });
+    await writeFile(join(customSkillsDir, 'my-skill', 'SKILL.md'), '# Mine\n');
+    await mkdir(join(customSkillsDir, 'changelog-format'), { recursive: true });
+    await writeFile(join(customSkillsDir, 'changelog-format', 'SKILL.md'), '# Shadowed\n');
+
+    const config = { ...BASE_CONFIG, skills: ['changelog-format', 'my-skill'] };
+    const home = await compileHome(config, { repoDir, outDir, customSkillsDir });
+    const tree = await readTree(home.dir);
+    expect(tree['skills/my-skill/SKILL.md']).toBe('# Mine\n');
+    expect(tree['skills/changelog-format/SKILL.md']).not.toBe('# Shadowed\n');
   });
 
   it('fails when a skill file is missing and leaves no bundle behind', async () => {

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import type { INestApplication } from '@nestjs/common';
@@ -13,6 +13,8 @@ import { ExperimentsController } from './experiments/experiments.controller';
 import { ExperimentsService } from './experiments/experiments.service';
 import { StatsService } from './experiments/stats.service';
 import { HealthController } from './health/health.controller';
+import { SkillsController } from './skills/skills.controller';
+import { SkillsService } from './skills/skills.service';
 import { VALID_REPO, writeRepo } from './sync/__fixtures__/repo';
 import { SyncService } from './sync/sync.service';
 import { TrialsController } from './trials/trials.controller';
@@ -50,19 +52,30 @@ const draft = {
 (databaseUrl ? describe : describe.skip)('API (needs TEST_DATABASE_URL)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
-  let env: Pick<ApiEnv, 'ANTHROPIC_API_KEY' | 'DATA_DIR'>;
+  let env: Pick<ApiEnv, 'ANTHROPIC_API_KEY' | 'DATA_DIR' | 'REPO_DIR'>;
   let http: () => request.Agent;
 
   beforeAll(async () => {
-    env = { ANTHROPIC_API_KEY: 'sk-test', DATA_DIR: await mkdtemp(join(tmpdir(), 'evals-data-')) };
+    env = {
+      ANTHROPIC_API_KEY: 'sk-test',
+      DATA_DIR: await mkdtemp(join(tmpdir(), 'evals-data-')),
+      REPO_DIR: '',
+    };
     const moduleRef = await Test.createTestingModule({
       imports: [PrismaModule.forRoot(databaseUrl!)],
-      controllers: [CatalogController, ExperimentsController, TrialsController, HealthController],
+      controllers: [
+        CatalogController,
+        ExperimentsController,
+        TrialsController,
+        HealthController,
+        SkillsController,
+      ],
       providers: [
         { provide: API_ENV, useValue: env },
         ExperimentsService,
         StatsService,
         TrialsService,
+        SkillsService,
       ],
     }).compile();
     app = moduleRef.createNestApplication();
@@ -83,6 +96,7 @@ const draft = {
       'tasks/sum-numbers/task.yaml': SECOND_TASK,
       'configs/base-opus.yaml': MODEL_CONFIG,
     });
+    env.REPO_DIR = repo;
     await new SyncService(prisma, repo).run();
   });
 
@@ -327,5 +341,104 @@ const draft = {
     await prisma.workerHeartbeat.create({ data: { id: 'worker' } });
     const beat = await http().get('/api/v1/health').expect(200);
     expect(beat.body.workerHeartbeatAgeSec).toBeLessThan(5);
+  });
+
+  describe('skill configs', () => {
+    const newSkill = {
+      kind: 'new',
+      name: 'csv-tidy',
+      description: 'House rules for tidy CSV files.',
+      instructions: '# CSV tidy\n\nAlways use semicolons as the delimiter.',
+    };
+
+    it('lists repo skills and reads one; rejects unsafe names', async () => {
+      expect((await http().get('/api/v1/skills').expect(200)).body).toEqual([
+        { name: 'changelog-format', description: '', source: 'repo' },
+      ]);
+      const skill = await http().get('/api/v1/skills/changelog-format').expect(200);
+      expect(skill.body).toMatchObject({ source: 'repo', content: '# Changelog format\n' });
+      await http().get('/api/v1/skills/nope').expect(404);
+      await http().get('/api/v1/skills/..').expect(400);
+    });
+
+    it('creates a config with a new skill that differs from the base only in skills', async () => {
+      const res = await http()
+        .post('/api/v1/configs')
+        .send({
+          id: 'base-csv-tidy',
+          name: 'Base + csv-tidy',
+          baseConfigId: 'base',
+          skill: newSkill,
+        })
+        .expect(201);
+      expect(res.body).toMatchObject({ id: 'base-csv-tidy', skills: ['csv-tidy'], maxTurns: 40 });
+
+      const file = await readFile(join(env.DATA_DIR, 'skills/csv-tidy/SKILL.md'), 'utf8');
+      expect(file).toBe(
+        '---\nname: csv-tidy\ndescription: "House rules for tidy CSV files."\nversion: 1.0.0\n---\n\n# CSV tidy\n\nAlways use semicolons as the delimiter.\n',
+      );
+      const skills = (await http().get('/api/v1/skills').expect(200)).body as { name: string }[];
+      expect(skills.map((s) => s.name)).toEqual(['changelog-format', 'csv-tidy']);
+
+      // The new config is a valid skills candidate against its base.
+      const created = await http()
+        .post('/api/v1/experiments')
+        .send({ ...draft, id: 'csv-tidy-test', candidateConfigId: 'base-csv-tidy' })
+        .expect(201);
+      expect(created.body).toMatchObject({ candidateConfig: 'base-csv-tidy' });
+      // A YAML sync leaves the UI config alone.
+      await new SyncService(prisma, env.REPO_DIR).run();
+      expect(await prisma.agentConfig.count({ where: { slug: 'base-csv-tidy' } })).toBe(1);
+    });
+
+    it('reuses an existing skill and rejects duplicates, clashes and bad bodies', async () => {
+      const existing = { kind: 'existing', name: 'changelog-format' };
+      await http()
+        .post('/api/v1/configs')
+        .send({ id: 'base-skill', name: 'x', baseConfigId: 'base', skill: existing })
+        .expect(409); // config id taken
+      await http()
+        .post('/api/v1/configs')
+        .send({ id: 'skill-again', name: 'x', baseConfigId: 'base-skill', skill: existing })
+        .expect(409); // base already has the skill
+      await http()
+        .post('/api/v1/configs')
+        .send({
+          id: 'x',
+          name: 'x',
+          baseConfigId: 'base',
+          skill: { ...newSkill, name: 'changelog-format' },
+        })
+        .expect(409); // skill name taken by the repo
+      const bad = await http()
+        .post('/api/v1/configs')
+        .send({
+          id: 'x',
+          name: 'x',
+          baseConfigId: 'base',
+          skill: { ...newSkill, instructions: '---\nname: x\n---\nbody text here ok' },
+        })
+        .expect(400);
+      expect(bad.body.details[0].message).toMatch(/front matter/);
+      await http()
+        .post('/api/v1/configs')
+        .send({ id: 'x', name: 'x', baseConfigId: 'nope', skill: existing })
+        .expect(404);
+      // A failed request writes no skill.
+      await expect(
+        readFile(join(env.DATA_DIR, 'skills/changelog-format/SKILL.md')),
+      ).rejects.toThrow();
+
+      const ok = await http()
+        .post('/api/v1/configs')
+        .send({
+          id: 'opus-changelog',
+          name: 'Opus + changelog',
+          baseConfigId: 'base-opus',
+          skill: existing,
+        })
+        .expect(201);
+      expect(ok.body).toMatchObject({ model: 'claude-opus-5', skills: ['changelog-format'] });
+    });
   });
 });

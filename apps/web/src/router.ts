@@ -6,6 +6,7 @@ export const router = createRouter({
     { path: '/', redirect: '/experiments' },
     { path: '/experiments', component: () => import('./views/ExperimentsList.vue') },
     { path: '/experiments/new', component: () => import('./views/NewExperiment.vue') },
+    { path: '/configs/new', component: () => import('./views/NewSkillConfig.vue') },
     {
       path: '/experiments/:id',
       component: () => import('./views/ExperimentCompare.vue'),

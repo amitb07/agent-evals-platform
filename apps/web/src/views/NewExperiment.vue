@@ -8,7 +8,7 @@ import {
   type TaskSummary,
 } from '@evals/shared';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { api, ApiRequestError, errorMessage } from '../api';
 import ErrorNote from '../components/ErrorNote.vue';
 import {
@@ -22,6 +22,7 @@ import {
 
 const props = defineProps<{ seed?: number }>();
 const router = useRouter();
+const route = useRoute();
 
 const form = ref(emptyForm(props.seed));
 const slugTouched = ref(false);
@@ -39,10 +40,25 @@ onMounted(async () => {
     tasks.value = taskList;
     const full = await Promise.all(configList.map((c) => api.config(c.slug)));
     configs.value = new Map(full.map((c) => [c.id, c]));
+    prefillFromQuery();
   } catch (e) {
     loadError.value = errorMessage(e);
   }
 });
+
+/** `?factor=&baseline=&candidate=` (from "Start an experiment" on the skill config page). */
+function prefillFromQuery(): void {
+  const { factor, baseline, candidate } = route.query;
+  if (typeof factor === 'string' && factorSchema.safeParse(factor).success) {
+    form.value.factor = factorSchema.parse(factor);
+  }
+  if (typeof baseline === 'string' && configs.value.has(baseline)) {
+    form.value.baselineConfigId = baseline;
+  }
+  if (typeof candidate === 'string' && configs.value.has(candidate)) {
+    form.value.candidateConfigId = candidate;
+  }
+}
 
 watch(
   () => form.value.name,
@@ -190,6 +206,13 @@ const input =
           {{ shown('candidateConfigId') }}
         </span>
       </label>
+      <p v-if="form.factor === 'skills'" class="text-xs text-stone-500 sm:col-span-3">
+        Testing your own skill?
+        <RouterLink to="/configs/new" class="font-medium text-stone-700 hover:underline">
+          Create a skill config
+        </RouterLink>
+        first; it appears here as a candidate.
+      </p>
     </section>
 
     <section class="rounded-lg border border-stone-200 bg-white p-4">
