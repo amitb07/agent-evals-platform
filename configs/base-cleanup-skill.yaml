@@ -1,0 +1,10 @@
+# E4 candidate: base plus the customer data cleanup skill (skills/customer-data-cleanup).
+id: base-cleanup-skill
+name: Base + customer-data-cleanup skill
+hermesImageDigest: 'sha256:36099926da316742423544e055d4734777105ffe6341873af5459b957d0c2919'
+model: claude-sonnet-5
+provider: anthropic
+skills: [customer-data-cleanup]
+toolsets: [terminal, file]
+memory: { mode: off }
+maxTurns: 30

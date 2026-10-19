@@ -1,0 +1,11 @@
+﻿Customer ID;Full Name;E-Mail;Telephone;Country;Last Updated;Notes;Newsletter
+0401;Hannah  Wolf;Hannah.Wolf@Posteo.de;030 66677788;Deutschland;12.01.2026 09:00;VIP, call first;yes
+0402;Pieter Bakker;pieter@bakker.nl;010 4445566;Holland;13.01.2026 10:30;;no
+0403;James Wright;james.wright@thames.co.uk;0161 4960000;Great Britain;14.01.2026 11:45;moved to Manchester;yes
+0404;Lucía Gómez;lucia@gomez.es;0034 915 551 234;España;15.01.2026 08:10;;yes
+0405;Hannah Wolf;hannah.wolf@posteo.de;;DE;20.01.2026 17:00;updated address;yes
+0406;Felix Gruber;felix@gruber.at;0699 11223344;Österreich;16.01.2026 12:00;;no
+0407;Test Shop;orders@example.com;030 0000001;DE;17.01.2026 13:00;internal;no
+0408;Sarah Miller;sarah@millerco.com;212 555 0199;United States;18.01.2026 14:20;;yes
+0409;Émile Laurent;emile@laurent.fr;04 91 55 12 34;France;19.01.2026 15:35;;no
+0410;Jonas Lange;jonas.lange@mailbox.org;0172 3344556;Germany;21.01.2026 09:50;;yes

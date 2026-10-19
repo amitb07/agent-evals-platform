@@ -1,0 +1,26 @@
+# Pre-registered before the run (plan §9, §12.9). Showcase experiment: the estimand is chosen so
+# the tasks the skill is for make up most of the suite (6 of 8), with 2 unrelated control tasks.
+id: e4-cleanup-skill
+name: E4 · customer data cleanup skill
+hypothesis: >-
+  B (with the customer-data-cleanup skill) scores higher than A on the six cleanup tasks,
+  including the two held-out ones, and the same on the two control tasks; with eight tasks the
+  suite-level effect is positive with a 95% CI above 0.
+factor: skills
+taskIds:
+  - cleanup-basic
+  - cleanup-duplicates
+  - cleanup-test-accounts
+  - cleanup-semicolon-export
+  - cleanup-two-exports
+  - cleanup-json-leads
+  - tools-region-report
+  - coding-roman
+baselineConfigId: base
+candidateConfigId: base-cleanup-skill
+repeats: 3
+concurrency: 4
+passThreshold: 0.8
+costCapUsd: 10
+seed: 404
+heldOutTaskIds: [cleanup-two-exports, cleanup-json-leads]

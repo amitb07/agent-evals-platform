@@ -1,0 +1,17 @@
+#!/bin/bash
+set -euo pipefail
+cd /app
+mkdir -p clean
+cat > clean/customers.csv <<'CSV'
+id,name,email,phone,country,updated_at
+101,Lena Fischer,lena.fischer@nordlicht.de,+49305550101,DE,2026-02-03T10:15:00Z
+102,Marc Dubois,marc.dubois@atelier.fr,+33142685300,FR,2026-02-04T09:30:00Z
+103,Oliver Grant,oliver@grant-co.uk,+442079460018,GB,2026-02-05T16:45:00Z
+104,Emily Carter,emily.carter@brightpath.com,+14155550142,US,2026-02-05T14:00:00Z
+105,Sofia Ruiz,sofia@ruizdesign.es,+34912345678,ES,2026-02-07T07:00:00Z
+106,Jan de Vries,jan@devries.nl,+31201234567,NL,2026-02-07T13:05:00Z
+109,Katrin Huber,katrin.huber@alpenblick.at,+4315056789,AT,2026-02-09T11:20:00Z
+CSV
+cat > clean/report.json <<'JSON'
+{"input_rows": 10, "test_rows_dropped": 2, "duplicates_merged": 1, "output_rows": 7}
+JSON

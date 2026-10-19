@@ -1,0 +1,7 @@
+customer_id,full_name,mail,mobile,country,modified
+601,Laura Bianchi,Laura@Bianchi-Studio.de,0151 9998887,Germany,2026-05-10T08:00:00+02:00
+602,Chloe Evans,CHLOE@evans.co.uk,07911 123456,United Kingdom,2026-04-20 10:00
+603,David Moreau,david.moreau@vins.fr,+33 5 56 44 33 22,FR,2026-05-03 10:00
+604,Greta Lind,greta@lind.at,0676 5554443,Austria,2026-05-08 16:30
+605,test checkout,checkout@acme.de,030 4564564,DE,2026-05-09 09:00
+606,Kai Brenner,kai@brenner.de,,,1778400000

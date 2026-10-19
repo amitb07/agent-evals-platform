@@ -1,0 +1,11 @@
+id,name,email,phone,country,updated_at
+101,Lena Fischer,Lena.Fischer@Nordlicht.de,030 5550101,Germany,2026-02-03 10:15
+102, Marc   Dubois ,marc.dubois@atelier.fr,01 42 68 53 00,France,04.02.2026 09:30
+103,Oliver Grant,OLIVER@grant-co.uk,020 7946 0018,United Kingdom,2026-02-05T16:45:00+00:00
+104,Emily Carter,emily.carter@brightpath.com,(415) 555-0142,USA,1770300000
+105,Sofia Ruiz,sofia@ruizdesign.es,+34 912 345 678,Spain,2026-02-07T08:00:00+01:00
+106,Jan de Vries,jan@devries.nl,020-1234567,Netherlands,07.02.2026 13:05
+107,Lena Fischer,lena.fischer@nordlicht.de,,DE,2026-01-15 08:00
+108,Test User,test.user@acme.de,030 0000000,DE,2026-02-01 12:00
+109,Katrin Huber,katrin.huber@alpenblick.at,0043 1 5056789,Österreich,2026-02-09 11:20
+110,Tom Becker,tom@example.com,0171 2345678,DE,2026-02-10 10:00

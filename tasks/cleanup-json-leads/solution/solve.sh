@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+cd /app
+mkdir -p clean
+cat > clean/customers.csv <<'CSV'
+id,name,email,phone,country,updated_at
+702,Hugo Petit,hugo@petit.fr,+33711223344,FR,2026-06-02T10:00:00Z
+703,Aisha Khan,aisha@khan-consulting.co.uk,+442031234567,GB,2026-06-01T07:46:40Z
+705,Marta Nowak,marta.nowak@firma.de,+492215556667,DE,2026-06-02T18:30:00Z
+706,Noah Weber,noah@weber.ch.example.org,+491517778889,DE,2026-06-04T11:00:00Z
+707,Isabel Ortega,isabel@ortega.es,+34678901234,ES,2026-06-05T15:15:00Z
+708,Ryan Cole,ryan@colebuild.com,+16465550177,US,2026-06-06T13:00:00Z
+CSV
+cat > clean/report.json <<'JSON'
+{"input_rows": 10, "test_rows_dropped": 2, "duplicates_merged": 2, "output_rows": 6}
+JSON

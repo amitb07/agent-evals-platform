@@ -1,0 +1,33 @@
+id: cleanup-duplicates
+title: Clean an export with many duplicates
+category: skill
+prompt: |
+  exports/customers.csv is a customer export with many duplicate records. Clean it following
+  our customer data cleanup standard: write the cleaned records to clean/customers.csv and the
+  cleanup report to clean/report.json. If a rule is unclear, use your best judgement; do not ask questions.
+fixtures: [exports/customers.csv]
+timeoutSec: 400
+tags: [cleanup]
+graders:
+  - { type: file_exists, id: output-exists, path: clean/customers.csv, weight: 0.05, gate: true }
+  - { type: command, id: format, run: python3 /tests/checks/check_cleanup.py format, weight: 0.1 }
+  - { type: command, id: rows, run: python3 /tests/checks/check_cleanup.py rows, weight: 0.25 }
+  - { type: command, id: emails, run: python3 /tests/checks/check_cleanup.py emails, weight: 0.1 }
+  - { type: command, id: phones, run: python3 /tests/checks/check_cleanup.py phones, weight: 0.15 }
+  - {
+      type: command,
+      id: countries,
+      run: python3 /tests/checks/check_cleanup.py countries,
+      weight: 0.1,
+    }
+  - {
+      type: command,
+      id: timestamps,
+      run: python3 /tests/checks/check_cleanup.py timestamps,
+      weight: 0.1,
+    }
+  - type: json
+    id: report
+    path: clean/report.json
+    expect: { input_rows: 14, test_rows_dropped: 1, duplicates_merged: 5, output_rows: 8 }
+    weight: 0.15

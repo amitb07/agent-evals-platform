@@ -1,0 +1,15 @@
+id,name,email,phone,country,updated_at
+201,Nina Roth,nina.roth@kontor.de,,DE,2026-03-01 09:00
+202,Paul Meyer,paul@meyer-bau.de,0221 998877,Germany,2026-03-05 12:00
+203,Claire Martin,claire@lumiere.fr,06 12 34 56 78,France,2026-03-04T10:00:00+01:00
+204,George Hall,george@harbour.co.uk,07700 900123,UK,1772000000
+205,Nina Roth,nina.roth@kontor.de,089 1234567,DE,2026-02-01 08:00
+206,Ines Costa,ines@costa.es,612 345 678,Spain,2026-03-02 14:00
+207,Bram Peeters,,0031 6 12345678,NL,2026-03-03 10:00
+208,Paul Meyer,Paul@Meyer-Bau.de,0221 998800,DE,05.03.2026 12:00
+209,Claire Martin,claire@lumiere.fr,+33 6 12 34 56 79,FR,2026-03-04 09:30
+210,Bram Peeters,,06 87654321,Netherlands,2026-03-08 16:00
+211,Nina Roth,Nina.Roth@Kontor.de,,,2026-03-10 18:00
+212,George Hall,george@harbour.co.uk,+44 7700 900124,GB,2026-02-20 10:00
+213,Ella Novak,ella@novak.at,0664 1234567,Austria,2026-03-06 07:45
+214,Test Account,shop@test.com,0170 1111111,DE,2026-03-07 10:00
