@@ -26,6 +26,8 @@ in both the YAML sync and the API. The image digest and turn limit must always m
 
 ## Components
 
+![System design](system-design.png)
+
 ```
 apps/api       NestJS: YAML sync, REST API (/api/v1), stats on read, trial files, demo seed loader
 apps/worker    NestJS: queue poller, config compiler, Harbor launcher, result ingestion, budget stop
