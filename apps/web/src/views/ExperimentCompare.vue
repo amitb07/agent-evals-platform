@@ -4,6 +4,7 @@ import { api } from '../api';
 import ArmMetrics from '../components/ArmMetrics.vue';
 import DeltaPlot from '../components/DeltaPlot.vue';
 import ErrorNote from '../components/ErrorNote.vue';
+import InfoTip from '../components/InfoTip.vue';
 import ProgressBar from '../components/ProgressBar.vue';
 import ScoreCostPlot from '../components/ScoreCostPlot.vue';
 import StatusBadge from '../components/StatusBadge.vue';
@@ -13,6 +14,7 @@ import '../charts';
 import { isActive, useExperimentActions } from '../composables/useExperimentActions';
 import { usePolling } from '../composables/usePolling';
 import { dateTime, usd } from '../format';
+import { HELP } from '../metric-help';
 
 const props = defineProps<{ id: string }>();
 
@@ -36,18 +38,25 @@ const { busy, actionError, act } = useExperimentActions(refresh);
     <div class="h-64 animate-pulse rounded-lg bg-stone-200" />
   </div>
   <ErrorNote v-else-if="!data && error" :message="error" />
-  <div v-else-if="data" class="space-y-5">
-    <header class="space-y-2">
-      <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-xl font-semibold">{{ data.experiment.name }}</h1>
-        <StatusBadge :status="data.experiment.status" />
-        <span
-          v-if="data.experiment.stopRequested && isActive(data.experiment.status)"
-          class="text-xs text-amber-700"
-        >
-          stopping…
-        </span>
-        <div class="ml-auto flex items-center gap-2">
+  <div v-else-if="data" class="space-y-6">
+    <header class="space-y-4">
+      <div class="flex flex-wrap items-start gap-x-4 gap-y-3">
+        <div class="min-w-0 flex-1 space-y-1.5">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <h1 class="text-2xl font-semibold tracking-tight">{{ data.experiment.name }}</h1>
+            <StatusBadge :status="data.experiment.status" />
+            <span
+              v-if="data.experiment.stopRequested && isActive(data.experiment.status)"
+              class="text-xs text-amber-700"
+            >
+              stopping…
+            </span>
+          </div>
+          <p class="max-w-3xl text-sm leading-relaxed text-stone-600">
+            {{ data.experiment.hypothesis }}
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
           <button
             v-if="data.experiment.status === 'draft'"
             type="button"
@@ -68,42 +77,62 @@ const { busy, actionError, act } = useExperimentActions(refresh);
           </button>
         </div>
       </div>
-      <p class="text-sm text-stone-700">{{ data.experiment.hypothesis }}</p>
-      <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
-        <div>
-          <dt class="inline">Factor</dt>
-          <dd class="ml-1 inline font-medium text-stone-900">{{ data.experiment.factor }}</dd>
+
+      <dl
+        class="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-stone-200 bg-stone-200 text-sm lg:grid-cols-5"
+      >
+        <div class="bg-white px-4 py-3">
+          <dt class="flex items-center gap-1.5 text-xs font-medium text-stone-500">
+            <span class="size-2 rounded-full bg-arm-a" aria-hidden="true" />A · baseline
+          </dt>
+          <dd
+            class="mt-1 truncate font-mono text-stone-900"
+            :title="data.experiment.baselineConfig"
+          >
+            {{ data.experiment.baselineConfig }}
+          </dd>
         </div>
-        <div>
-          <dt class="inline">A</dt>
-          <dd class="ml-1 inline font-mono text-stone-900">{{ data.experiment.baselineConfig }}</dd>
-        </div>
-        <div>
-          <dt class="inline">B</dt>
-          <dd class="ml-1 inline font-mono text-stone-900">
+        <div class="bg-white px-4 py-3">
+          <dt class="flex items-center gap-1.5 text-xs font-medium text-stone-500">
+            <span class="size-2 rounded-full bg-arm-b" aria-hidden="true" />B · candidate
+          </dt>
+          <dd
+            class="mt-1 truncate font-mono text-stone-900"
+            :title="data.experiment.candidateConfig"
+          >
             {{ data.experiment.candidateConfig }}
           </dd>
         </div>
-        <div class="flex items-center gap-2">
-          <dt>Progress</dt>
-          <dd>
+        <div class="bg-white px-4 py-3">
+          <dt class="flex items-center gap-1 text-xs font-medium text-stone-500">
+            Factor <InfoTip label="About factor" :text="HELP.factor" />
+          </dt>
+          <dd class="mt-1 font-medium text-stone-900">{{ data.experiment.factor }}</dd>
+        </div>
+        <div class="bg-white px-4 py-3">
+          <dt class="flex items-center gap-1 text-xs font-medium text-stone-500">
+            Progress <InfoTip label="About progress" :text="HELP.progress" />
+          </dt>
+          <dd class="mt-1.5">
             <ProgressBar
               :done="data.experiment.progress.done"
               :total="data.experiment.progress.total"
             />
           </dd>
         </div>
-        <div>
-          <dt class="inline">Spend</dt>
-          <dd class="ml-1 inline tabular-nums text-stone-900">
-            {{ usd(data.experiment.spendUsd) }} of {{ usd(data.experiment.costCapUsd) }} cap
+        <div class="col-span-2 bg-white px-4 py-3 lg:col-span-1">
+          <dt class="flex items-center gap-1 text-xs font-medium text-stone-500">
+            Spend <InfoTip label="About spend" :text="HELP.spend" />
+          </dt>
+          <dd class="mt-1 tabular-nums text-stone-900">
+            {{ usd(data.experiment.spendUsd) }}
+            <span class="text-stone-500">of {{ usd(data.experiment.costCapUsd) }} cap</span>
           </dd>
         </div>
-        <div v-if="data.experiment.startedAt">
-          <dt class="inline">Started</dt>
-          <dd class="ml-1 inline">{{ dateTime(data.experiment.startedAt) }}</dd>
-        </div>
       </dl>
+      <p v-if="data.experiment.startedAt" class="text-xs text-stone-500">
+        Started {{ dateTime(data.experiment.startedAt) }}
+      </p>
     </header>
 
     <ErrorNote v-if="error" :message="`Refresh failed: ${error}`" />
@@ -112,7 +141,7 @@ const { busy, actionError, act } = useExperimentActions(refresh);
 
     <p
       v-if="data.experiment.status === 'draft'"
-      class="rounded-lg border border-dashed border-stone-300 bg-white p-6 text-center text-sm text-stone-600"
+      class="rounded-xl border border-dashed border-stone-300 bg-white p-6 text-center text-sm text-stone-600"
     >
       Draft: {{ data.experiment.progress.total }} trials will run. Results appear here as trials
       finish.
@@ -123,7 +152,12 @@ const { busy, actionError, act } = useExperimentActions(refresh);
         :baseline="data.experiment.baselineConfig"
         :candidate="data.experiment.candidateConfig"
       />
-      <div class="grid items-start gap-5 lg:grid-cols-2">
+      <ArmMetrics
+        :stats="data.stats"
+        :baseline="data.experiment.baselineConfig"
+        :candidate="data.experiment.candidateConfig"
+      />
+      <div class="grid gap-6 lg:grid-cols-2">
         <DeltaPlot :stats="data.stats" />
         <ScoreCostPlot
           :stats="data.stats"
@@ -132,11 +166,6 @@ const { busy, actionError, act } = useExperimentActions(refresh);
         />
       </div>
       <TaskTable :experiment="data.experiment" :stats="data.stats" />
-      <ArmMetrics
-        :stats="data.stats"
-        :baseline="data.experiment.baselineConfig"
-        :candidate="data.experiment.candidateConfig"
-      />
     </template>
   </div>
 </template>

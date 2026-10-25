@@ -89,13 +89,23 @@ const option = computed(() => {
 </script>
 
 <template>
-  <figure class="rounded-lg border border-stone-200 bg-white p-4">
-    <figcaption class="text-sm font-medium">
-      Per-task delta
-      <span class="font-normal text-stone-500">
-        — each dot is one task's mean score in B minus A; dashed line is their mean; shaded band is
-        its 95% CI
-      </span>
+  <figure class="h-full rounded-xl border border-stone-200 bg-white px-5 py-4">
+    <figcaption>
+      <h2 class="text-sm font-semibold">Per-task delta</h2>
+      <p class="mt-0.5 text-xs text-stone-500">
+        Each dot is one task's mean score in B minus A. Right of 0 means B scored higher.
+      </p>
+      <ul class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-600" aria-hidden="true">
+        <li class="flex items-center gap-1.5">
+          <span class="size-2.5 rounded-full bg-arm-b ring-2 ring-white" />task
+        </li>
+        <li class="flex items-center gap-1.5">
+          <span class="h-3 border-l-2 border-dashed border-stone-900" />mean
+        </li>
+        <li class="flex items-center gap-1.5">
+          <span class="h-3 w-4 rounded-sm bg-stone-500/15" />95% CI of the mean
+        </li>
+      </ul>
     </figcaption>
     <p v-if="rows.length === 0" class="py-8 text-center text-sm text-stone-500">
       Deltas appear once a task has valid trials in both arms.

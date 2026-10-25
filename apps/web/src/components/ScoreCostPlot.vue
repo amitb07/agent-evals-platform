@@ -55,9 +55,12 @@ const option = computed(() => {
 </script>
 
 <template>
-  <figure class="rounded-lg border border-stone-200 bg-white p-4">
-    <figcaption class="text-sm font-medium">
-      Score vs. cost <span class="font-normal text-stone-500">— one dot per task and arm</span>
+  <figure class="h-full rounded-xl border border-stone-200 bg-white px-5 py-4">
+    <figcaption>
+      <h2 class="text-sm font-semibold">Score vs. cost</h2>
+      <p class="mt-0.5 text-xs text-stone-500">
+        One dot per task and arm. Up and to the left is better: higher score, lower cost.
+      </p>
     </figcaption>
     <p v-if="!hasData" class="py-8 text-center text-sm text-stone-500">No graded trials yet.</p>
     <VChart
